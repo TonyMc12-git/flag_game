@@ -299,7 +299,7 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260418-spicy-controls1";
+const APP_VERSION = "20260418-fit-all-modes1";
 
 const gameModes = {
   un: {
