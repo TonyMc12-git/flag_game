@@ -130,6 +130,11 @@ h1 {
   box-shadow: none;
 }
 
+.confirm-button {
+  background: #f2c14e;
+  min-width: 104px;
+}
+
 .score-label {
   display: block;
   color: var(--muted);
@@ -388,6 +393,73 @@ h1 {
     font-size: clamp(0.76rem, 3.25vw, 0.96rem);
     line-height: 0.9;
   }
+
+  .spicy-mode .game-panel {
+    gap: 3px;
+    padding: 5px;
+  }
+
+  .spicy-mode .top-bar {
+    gap: 5px;
+  }
+
+  .spicy-mode h1 {
+    font-size: 1.55rem;
+  }
+
+  .spicy-mode .top-actions {
+    gap: 4px;
+  }
+
+  .spicy-mode .score-card {
+    min-width: 106px;
+    padding: 4px 5px;
+  }
+
+  .spicy-mode .score-label {
+    font-size: 0.56rem;
+  }
+
+  .spicy-mode #score {
+    font-size: 1.05rem;
+  }
+
+  .spicy-mode .score-context {
+    font-size: 0.52rem;
+  }
+
+  .spicy-mode .mode-button {
+    margin-top: 3px;
+    padding: 4px 5px;
+    font-size: 0.54rem;
+  }
+
+  .spicy-mode .fifty-button {
+    min-width: 82px;
+    padding: 5px 6px;
+    font-size: 0.8rem;
+  }
+
+  .spicy-mode .flag-emoji {
+    font-size: clamp(5rem, 26vw, 7rem);
+  }
+
+  .spicy-mode .options-grid {
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .spicy-mode .option-button {
+    padding: 2px 3px;
+    border-radius: 6px;
+    font-size: clamp(0.78rem, 3.35vw, 0.98rem);
+    line-height: 0.88;
+  }
+
+  .spicy-mode .option-button.long-option {
+    font-size: clamp(0.58rem, 2.45vw, 0.72rem);
+    line-height: 0.82;
+  }
 }
 
 @media (max-width: 380px) {
@@ -397,5 +469,17 @@ h1 {
 
   .option-button.long-option {
     font-size: clamp(0.68rem, 3vw, 0.84rem);
+  }
+
+  .spicy-mode h1 {
+    font-size: 1.35rem;
+  }
+
+  .spicy-mode .option-button {
+    font-size: clamp(0.68rem, 3vw, 0.86rem);
+  }
+
+  .spicy-mode .option-button.long-option {
+    font-size: clamp(0.52rem, 2.25vw, 0.66rem);
   }
 }

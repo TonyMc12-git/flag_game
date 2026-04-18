@@ -299,7 +299,7 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260418-updates1";
+const APP_VERSION = "20260418-spicy-controls1";
 
 const gameModes = {
   un: {
@@ -357,7 +357,7 @@ modeButtonEl.addEventListener("click", () => {
   resetGame(state.mode === "un" ? "nonUn" : "un");
 });
 spicyButtonEl.addEventListener("click", () => {
-  resetGame(state.mode === "spicy" ? "un" : "spicy");
+  resetGame(state.mode === "spicy" ? "nonUn" : "spicy");
 });
 celebrationButtonEl.addEventListener("click", () => {
   if (Date.now() < state.feedbackReadyAt) {
@@ -403,10 +403,13 @@ function startRound() {
   state.isFiftyUsed = false;
   state.isComplete = false;
   state.selectedCodes = new Set();
-  fiftyButtonEl.textContent = modeConfig.type === "multi" ? "Check" : "50/50";
+  const isSpicyMode = modeConfig.type === "multi";
+  document.body.classList.toggle("spicy-mode", isSpicyMode);
+  fiftyButtonEl.classList.toggle("confirm-button", isSpicyMode);
+  fiftyButtonEl.textContent = isSpicyMode ? "Confirm" : "50/50";
   fiftyButtonEl.disabled = false;
-  modeButtonEl.textContent = modeConfig.switchLabel;
-  spicyButtonEl.textContent = state.mode === "spicy" ? "UN countries?" : "Spicy";
+  modeButtonEl.textContent = isSpicyMode ? "UN countries" : modeConfig.switchLabel;
+  spicyButtonEl.textContent = isSpicyMode ? "non-UN countries" : "Spicy";
   scoreContextEl.textContent = modeConfig.scoreContext;
 
   flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.flagCode || state.currentCountry.code);
