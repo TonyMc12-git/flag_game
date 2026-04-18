@@ -147,7 +147,6 @@ celebrationButtonEl.addEventListener("click", () => {
 function startRound() {
   state.currentCountry = sampleOne(countries);
   state.isLocked = false;
-  state.presented += 1;
 
   flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
   renderOptions(buildOptions(state.currentCountry));
@@ -190,6 +189,7 @@ function chooseCountry(country, button) {
 
   state.isLocked = true;
   const isCorrect = country.code === state.currentCountry.code;
+  state.presented += 1;
   if (isCorrect) {
     state.correct += 1;
   }
