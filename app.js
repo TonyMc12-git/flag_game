@@ -128,6 +128,7 @@ const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
 const celebrationTitleEl = document.getElementById("celebration-title");
 const celebrationCopyEl = document.getElementById("celebration-copy");
+const celebrationButtonEl = document.getElementById("celebration-button");
 
 const state = {
   currentCountry: null,
@@ -138,6 +139,10 @@ const state = {
 
 registerServiceWorker();
 startRound();
+celebrationButtonEl.addEventListener("click", () => {
+  hideCelebration();
+  startRound();
+});
 
 function startRound() {
   state.currentCountry = sampleOne(countries);
@@ -202,11 +207,6 @@ function chooseCountry(country, button) {
 
   renderScore();
   showCelebration(isCorrect, country.name);
-
-  window.setTimeout(() => {
-    hideCelebration();
-    startRound();
-  }, isCorrect ? 1100 : 1500);
 }
 
 function showCelebration(isCorrect, chosenName) {
