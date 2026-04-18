@@ -267,6 +267,8 @@ const state = {
   currentCountry: null,
   currentOptions: [],
   deck: [],
+  feedbackTimer: null,
+  feedbackReadyAt: 0,
   isLocked: false,
   isFiftyUsed: false,
   isComplete: false,
@@ -281,6 +283,10 @@ modeButtonEl.addEventListener("click", () => {
   resetGame(state.mode === "un" ? "nonUn" : "un");
 });
 celebrationButtonEl.addEventListener("click", () => {
+  if (Date.now() < state.feedbackReadyAt) {
+    return;
+  }
+
   hideCelebration();
   if (state.isComplete) {
     return;
@@ -427,8 +433,7 @@ function showCelebration(isCorrect, chosenName) {
   celebrationCopyEl.textContent = isCorrect
     ? `${state.currentCountry.name} is right.`
     : `You chose ${chosenName}.`;
-  celebrationEl.classList.add("show");
-  celebrationEl.setAttribute("aria-hidden", "false");
+  showFeedback();
 }
 
 function showCompletion() {
@@ -436,11 +441,23 @@ function showCompletion() {
   celebrationKickerEl.textContent = "Complete";
   celebrationTitleEl.textContent = "Full Set Done";
   celebrationCopyEl.textContent = `You finished ${gameModes[state.mode].scoreContext}. Restart the app to play this set again.`;
+  showFeedback();
+}
+
+function showFeedback() {
+  window.clearTimeout(state.feedbackTimer);
+  state.feedbackReadyAt = Date.now() + 400;
+  celebrationButtonEl.disabled = true;
   celebrationEl.classList.add("show");
   celebrationEl.setAttribute("aria-hidden", "false");
+  state.feedbackTimer = window.setTimeout(() => {
+    celebrationButtonEl.disabled = false;
+  }, 400);
 }
 
 function hideCelebration() {
+  window.clearTimeout(state.feedbackTimer);
+  celebrationButtonEl.disabled = false;
   celebrationEl.classList.remove("show");
   celebrationEl.setAttribute("aria-hidden", "true");
 }

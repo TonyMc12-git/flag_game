@@ -284,6 +284,11 @@ h1 {
   -webkit-tap-highlight-color: transparent;
 }
 
+.celebration-button:disabled {
+  opacity: 0.72;
+  cursor: default;
+}
+
 @media (max-width: 700px) {
   body {
     min-height: 100dvh;
