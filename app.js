@@ -299,7 +299,7 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260418-fit-grid2";
+const APP_VERSION = "20260418-centered-grid1";
 
 const gameModes = {
   un: {

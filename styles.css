@@ -149,22 +149,32 @@ h1 {
 }
 
 .flag-stage {
+  position: relative;
   display: grid;
   place-items: center;
+  width: 100%;
+  overflow: hidden;
 }
 
 .spicy-instruction {
   display: none;
   margin: 0;
-  max-width: 11rem;
+  width: min(280px, 78vw);
   color: var(--ink);
   font-size: 0.82rem;
   font-weight: 900;
   line-height: 1.08;
+  text-align: center;
+  pointer-events: none;
 }
 
 .spicy-mode .spicy-instruction {
   display: block;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
 }
 
 .flag-card {
@@ -418,25 +428,18 @@ h1 {
   }
 
   .flag-card {
-    width: min(430px, 96vw);
+    width: min(470px, 98vw);
+    max-width: 100%;
   }
 
   .flag-emoji {
-    font-size: clamp(7rem, 39vw, 10.6rem);
-  }
-
-  .spicy-mode .flag-stage {
-    grid-template-columns: minmax(70px, 0.55fr) auto;
-    justify-content: center;
-    gap: 5px;
+    font-size: clamp(7.6rem, 43vw, 11.8rem);
   }
 
   .spicy-mode .spicy-instruction {
-    max-width: 90px;
-    justify-self: end;
-    text-align: right;
+    width: min(250px, 72vw);
     font-size: 0.62rem;
-    line-height: 0.96;
+    line-height: 0.92;
   }
 
   .options-grid {
@@ -452,17 +455,19 @@ h1 {
   .option-button {
     min-height: 0;
     height: 100%;
-    padding: 1px 3px;
+    max-width: 100%;
+    padding: 0 3px;
     border-radius: 5px;
-    font-size: clamp(0.82rem, 3.65vw, 1rem);
-    line-height: 0.82;
+    font-size: clamp(0.94rem, 4.15vw, 1.12rem);
+    line-height: 0.78;
     overflow-wrap: anywhere;
+    overflow: hidden;
     box-shadow: 0 2px 7px rgba(8, 30, 18, 0.07);
   }
 
   .option-button.long-option {
-    font-size: clamp(0.62rem, 2.7vw, 0.78rem);
-    line-height: 0.78;
+    font-size: clamp(0.58rem, 2.55vw, 0.72rem);
+    line-height: 0.74;
   }
 
   .spicy-mode .options-grid {
@@ -472,11 +477,11 @@ h1 {
 
 @media (max-width: 380px) {
   .option-button {
-    font-size: clamp(0.74rem, 3.35vw, 0.9rem);
+    font-size: clamp(0.84rem, 3.8vw, 1rem);
   }
 
   .option-button.long-option {
-    font-size: clamp(0.56rem, 2.45vw, 0.68rem);
+    font-size: clamp(0.5rem, 2.25vw, 0.62rem);
   }
 
   .score-card {
@@ -488,7 +493,7 @@ h1 {
   }
 
   .spicy-mode .spicy-instruction {
-    max-width: 76px;
-    font-size: 0.54rem;
+    width: min(220px, 68vw);
+    font-size: 0.52rem;
   }
 }
