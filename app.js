@@ -199,7 +199,7 @@ const lookalikeFlagGroups = [
   ["RO", "TD"]
 ];
 
-const longOptionCodes = new Set(["GS", "MF", "SH"]);
+const longOptionCodes = new Set(["GS", "SH"]);
 
 const nonUnCountries = [
   { name: "American Samoa", code: "AS" },
@@ -299,7 +299,7 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260418-fit-all-modes1";
+const APP_VERSION = "20260418-fit-grid1";
 
 const gameModes = {
   un: {

@@ -312,6 +312,7 @@ h1 {
 @media (max-width: 700px) {
   body {
     min-height: 100dvh;
+    height: 100dvh;
     overflow: hidden;
   }
 
@@ -319,15 +320,30 @@ h1 {
     min-height: 100dvh;
     height: 100dvh;
     padding: 6px;
+    overflow: hidden;
+  }
+
+  @supports (height: 100svh) {
+    body {
+      min-height: 100svh;
+      height: 100svh;
+    }
+
+    .app-shell {
+      min-height: 100svh;
+      height: 100svh;
+    }
   }
 
   .game-panel {
     min-height: 0;
     height: 100%;
+    max-height: 100%;
     grid-template-rows: auto auto minmax(0, 1fr);
-    gap: 3px;
+    gap: 2px;
     padding: 5px;
     border-radius: 18px;
+    overflow: hidden;
   }
 
   .top-bar {
@@ -388,30 +404,32 @@ h1 {
   }
 
   .flag-card {
-    width: min(320px, 88vw);
+    width: min(370px, 92vw);
   }
 
   .flag-emoji {
-    font-size: clamp(4.8rem, 25vw, 7.2rem);
+    font-size: clamp(5.8rem, 31vw, 8.6rem);
   }
 
   .options-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(10, minmax(0, 1fr));
-    gap: 4px;
+    gap: 3px;
     min-height: 0;
     height: 100%;
+    max-height: 100%;
     overflow: hidden;
   }
 
   .option-button {
     min-height: 0;
     height: 100%;
-    padding: 4px 5px;
-    border-radius: 7px;
-    font-size: clamp(1.12rem, 4.8vw, 1.42rem);
-    line-height: 0.95;
+    padding: 2px 4px;
+    border-radius: 6px;
+    font-size: clamp(0.96rem, 4.15vw, 1.18rem);
+    line-height: 0.88;
     overflow-wrap: anywhere;
+    box-shadow: 0 4px 10px rgba(8, 30, 18, 0.08);
   }
 
   .option-button.long-option {
@@ -426,7 +444,7 @@ h1 {
 
 @media (max-width: 380px) {
   .option-button {
-    font-size: clamp(1rem, 4.55vw, 1.25rem);
+    font-size: clamp(0.86rem, 3.9vw, 1.05rem);
   }
 
   .option-button.long-option {
