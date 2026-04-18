@@ -199,7 +199,7 @@ const lookalikeFlagGroups = [
   ["RO", "TD"]
 ];
 
-const longOptionCodes = new Set(["GS", "SH"]);
+const longOptionCodes = new Set(["GS", "MF", "SH"]);
 
 const nonUnCountries = [
   { name: "American Samoa", code: "AS" },
@@ -237,7 +237,6 @@ const nonUnCountries = [
   { name: "Puerto Rico", code: "PR" },
   { name: "Saint Barthelemy", code: "BL" },
   { name: "Saint Helena, Ascension and Tristan da Cunha", code: "SH" },
-  { name: "Saint Martin", code: "MF" },
   { name: "Sint Maarten", code: "SX" },
   { name: "South Georgia and the South Sandwich Islands", code: "GS" },
   { name: "French Southern Territories", code: "TF" },
@@ -250,15 +249,73 @@ const nonUnCountries = [
   { name: "Western Sahara", code: "EH" }
 ];
 
+const duplicateFlagGroups = [
+  {
+    name: "French flag",
+    flagCode: "FR",
+    correct: [
+      { name: "France", code: "FR" },
+      { name: "French Guiana", code: "GF" },
+      { name: "Guadeloupe", code: "GP" },
+      { name: "Martinique", code: "MQ" },
+      { name: "Mayotte", code: "YT" },
+      { name: "Reunion", code: "RE" },
+      { name: "Saint Martin", code: "MF" },
+      { name: "Saint Pierre and Miquelon", code: "PM" }
+    ]
+  },
+  {
+    name: "Norwegian flag",
+    flagCode: "NO",
+    correct: [
+      { name: "Norway", code: "NO" },
+      { name: "Bouvet Island", code: "BV" },
+      { name: "Svalbard and Jan Mayen", code: "SJ" }
+    ]
+  },
+  {
+    name: "Australian flag",
+    flagCode: "AU",
+    correct: [
+      { name: "Australia", code: "AU" },
+      { name: "Heard Island and McDonald Islands", code: "HM" }
+    ]
+  },
+  {
+    name: "Dutch flag",
+    flagCode: "NL",
+    correct: [
+      { name: "Netherlands", code: "NL" },
+      { name: "Caribbean Netherlands", code: "BQ" }
+    ]
+  },
+  {
+    name: "U.S. flag",
+    flagCode: "US",
+    correct: [
+      { name: "United States", code: "US" },
+      { name: "U.S. Outlying Islands", code: "UM" }
+    ]
+  }
+];
+
 const gameModes = {
   un: {
+    type: "single",
     countries,
     scoreContext: "of 193 UN countries",
     switchLabel: "non UN countries?"
   },
   nonUn: {
+    type: "single",
     countries: nonUnCountries,
     scoreContext: `of ${nonUnCountries.length} non-UN countries/territories`,
+    switchLabel: "UN countries?"
+  },
+  spicy: {
+    type: "multi",
+    countries: duplicateFlagGroups,
+    scoreContext: `of ${duplicateFlagGroups.length} spicy flags`,
     switchLabel: "UN countries?"
   }
 };
@@ -269,6 +326,7 @@ const scoreEl = document.getElementById("score");
 const scoreContextEl = document.getElementById("score-context");
 const fiftyButtonEl = document.getElementById("fifty-button");
 const modeButtonEl = document.getElementById("mode-button");
+const spicyButtonEl = document.getElementById("spicy-button");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
 const celebrationTitleEl = document.getElementById("celebration-title");
@@ -280,6 +338,7 @@ const state = {
   currentCountry: null,
   currentOptions: [],
   deck: [],
+  selectedCodes: new Set(),
   feedbackTimer: null,
   feedbackReadyAt: 0,
   isLocked: false,
@@ -294,6 +353,9 @@ resetGame("un");
 fiftyButtonEl.addEventListener("click", useFiftyFifty);
 modeButtonEl.addEventListener("click", () => {
   resetGame(state.mode === "un" ? "nonUn" : "un");
+});
+spicyButtonEl.addEventListener("click", () => {
+  resetGame(state.mode === "spicy" ? "un" : "spicy");
 });
 celebrationButtonEl.addEventListener("click", () => {
   if (Date.now() < state.feedbackReadyAt) {
@@ -310,10 +372,11 @@ celebrationButtonEl.addEventListener("click", () => {
 
 function resetGame(mode) {
   state.mode = mode;
-  state.deck = shuffleList(getCurrentCountries());
+  state.deck = shuffleList(gameModes[state.mode].countries);
   state.correct = 0;
   state.presented = 0;
   state.isComplete = false;
+  state.selectedCodes = new Set();
   startRound();
 }
 
@@ -331,15 +394,20 @@ function startRound() {
   }
 
   state.currentCountry = state.deck.pop();
-  state.currentOptions = buildOptions(state.currentCountry);
+  state.currentOptions = modeConfig.type === "multi"
+    ? buildSpicyOptions(state.currentCountry)
+    : buildOptions(state.currentCountry);
   state.isLocked = false;
   state.isFiftyUsed = false;
   state.isComplete = false;
+  state.selectedCodes = new Set();
+  fiftyButtonEl.textContent = modeConfig.type === "multi" ? "Check" : "50/50";
   fiftyButtonEl.disabled = false;
   modeButtonEl.textContent = modeConfig.switchLabel;
+  spicyButtonEl.textContent = state.mode === "spicy" ? "UN countries?" : "Spicy";
   scoreContextEl.textContent = modeConfig.scoreContext;
 
-  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
+  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.flagCode || state.currentCountry.code);
   renderOptions(state.currentOptions);
   renderScore();
 }
@@ -352,6 +420,14 @@ function buildOptions(correctCountry) {
   }))
     .slice(0, 19);
   return [correctCountry, ...distractors]
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function buildSpicyOptions(flagGroup) {
+  const correctCodes = new Set(flagGroup.correct.map((country) => country.code));
+  const distractors = shuffleList(nonUnCountries.filter((country) => !correctCodes.has(country.code)))
+    .slice(0, 20 - flagGroup.correct.length);
+  return [...flagGroup.correct, ...distractors]
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
@@ -383,7 +459,11 @@ function renderOptions(options) {
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       button.classList.add("pressing");
-      chooseCountry(country, button);
+      if (gameModes[state.mode].type === "multi") {
+        toggleSpicyChoice(country, button);
+      } else {
+        chooseCountry(country, button);
+      }
     });
     button.addEventListener("pointerup", () => {
       button.classList.remove("pressing");
@@ -393,6 +473,20 @@ function renderOptions(options) {
     });
     optionsGridEl.appendChild(button);
   });
+}
+
+function toggleSpicyChoice(country, button) {
+  if (state.isLocked) {
+    return;
+  }
+
+  if (state.selectedCodes.has(country.code)) {
+    state.selectedCodes.delete(country.code);
+    button.classList.remove("selected");
+  } else {
+    state.selectedCodes.add(country.code);
+    button.classList.add("selected");
+  }
 }
 
 function chooseCountry(country, button) {
@@ -424,6 +518,11 @@ function chooseCountry(country, button) {
 }
 
 function useFiftyFifty() {
+  if (gameModes[state.mode].type === "multi") {
+    checkSpicySelection();
+    return;
+  }
+
   if (state.isLocked || state.isFiftyUsed) {
     return;
   }
@@ -442,6 +541,35 @@ function useFiftyFifty() {
     });
 }
 
+function checkSpicySelection() {
+  if (state.isLocked) {
+    return;
+  }
+
+  state.isLocked = true;
+  fiftyButtonEl.disabled = true;
+  const correctCodes = new Set(state.currentCountry.correct.map((country) => country.code));
+  const missedCodes = [...correctCodes].filter((code) => !state.selectedCodes.has(code));
+  const extraCodes = [...state.selectedCodes].filter((code) => !correctCodes.has(code));
+  const isCorrect = missedCodes.length === 0 && extraCodes.length === 0;
+  state.presented += 1;
+  if (isCorrect) {
+    state.correct += 1;
+  }
+
+  [...optionsGridEl.querySelectorAll(".option-button")].forEach((optionButton) => {
+    optionButton.disabled = true;
+    if (correctCodes.has(optionButton.dataset.countryCode)) {
+      optionButton.classList.add("correct");
+    } else if (state.selectedCodes.has(optionButton.dataset.countryCode)) {
+      optionButton.classList.add("incorrect");
+    }
+  });
+
+  renderScore();
+  showSpicyCelebration(isCorrect, missedCodes, extraCodes);
+}
+
 function showCelebration(isCorrect, chosenName) {
   celebrationEl.classList.toggle("wrong", !isCorrect);
   celebrationKickerEl.textContent = isCorrect ? "Correct" : "Answer";
@@ -450,6 +578,30 @@ function showCelebration(isCorrect, chosenName) {
     ? `${state.currentCountry.name} is right.`
     : `You chose ${chosenName}.`;
   showFeedback();
+}
+
+function showSpicyCelebration(isCorrect, missedCodes, extraCodes) {
+  celebrationEl.classList.toggle("wrong", !isCorrect);
+  celebrationKickerEl.textContent = isCorrect ? "Correct" : "Answer";
+  celebrationTitleEl.textContent = isCorrect ? "Nice!" : state.currentCountry.name;
+  celebrationCopyEl.textContent = isCorrect
+    ? "You got every matching option."
+    : buildSpicyAnswerCopy(missedCodes, extraCodes);
+  showFeedback();
+}
+
+function buildSpicyAnswerCopy(missedCodes, extraCodes) {
+  const namesByCode = new Map(state.currentOptions.map((country) => [country.code, country.name]));
+  const missedNames = missedCodes.map((code) => namesByCode.get(code)).filter(Boolean);
+  const extraNames = extraCodes.map((code) => namesByCode.get(code)).filter(Boolean);
+  const parts = [];
+  if (missedNames.length > 0) {
+    parts.push(`Missed: ${missedNames.join(", ")}.`);
+  }
+  if (extraNames.length > 0) {
+    parts.push(`Extra: ${extraNames.join(", ")}.`);
+  }
+  return parts.join(" ");
 }
 
 function showCompletion() {
