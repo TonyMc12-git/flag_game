@@ -199,6 +199,8 @@ const lookalikeFlagGroups = [
   ["RO", "TD"]
 ];
 
+const longOptionCodes = new Set(["GS", "SH"]);
+
 const nonUnCountries = [
   { name: "American Samoa", code: "AS" },
   { name: "Antarctica", code: "AQ" },
@@ -375,6 +377,9 @@ function renderOptions(options) {
     button.className = "option-button";
     button.textContent = country.name;
     button.dataset.countryCode = country.code;
+    if (longOptionCodes.has(country.code)) {
+      button.classList.add("long-option");
+    }
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       button.classList.add("pressing");
