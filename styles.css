@@ -82,6 +82,30 @@ h1 {
   text-align: right;
 }
 
+.score-context {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.mode-button {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 7px 8px;
+  border: 1px solid rgba(19, 37, 27, 0.14);
+  border-radius: 9px;
+  background: #eaf3ec;
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .fifty-button {
   min-width: 82px;
   padding: 10px 12px;
@@ -291,8 +315,18 @@ h1 {
   }
 
   .score-card {
-    min-width: 74px;
+    min-width: 92px;
     padding: 5px 8px;
+  }
+
+  .score-context {
+    font-size: 0.58rem;
+  }
+
+  .mode-button {
+    margin-top: 5px;
+    padding: 5px 6px;
+    font-size: 0.58rem;
   }
 
   .fifty-button {

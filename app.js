@@ -199,10 +199,63 @@ const lookalikeFlagGroups = [
   ["RO", "TD"]
 ];
 
+const nonUnCountries = [
+  { name: "American Samoa", code: "AS" },
+  { name: "Anguilla", code: "AI" },
+  { name: "Aruba", code: "AW" },
+  { name: "Bermuda", code: "BM" },
+  { name: "British Virgin Islands", code: "VG" },
+  { name: "Cayman Islands", code: "KY" },
+  { name: "Cook Islands", code: "CK" },
+  { name: "Curacao", code: "CW" },
+  { name: "Falkland Islands", code: "FK" },
+  { name: "Faroe Islands", code: "FO" },
+  { name: "French Polynesia", code: "PF" },
+  { name: "Gibraltar", code: "GI" },
+  { name: "Greenland", code: "GL" },
+  { name: "Guam", code: "GU" },
+  { name: "Guernsey", code: "GG" },
+  { name: "Hong Kong", code: "HK" },
+  { name: "Isle of Man", code: "IM" },
+  { name: "Jersey", code: "JE" },
+  { name: "Kosovo", code: "XK" },
+  { name: "Macau", code: "MO" },
+  { name: "Montserrat", code: "MS" },
+  { name: "New Caledonia", code: "NC" },
+  { name: "Niue", code: "NU" },
+  { name: "Northern Mariana Islands", code: "MP" },
+  { name: "Palestine", code: "PS" },
+  { name: "Puerto Rico", code: "PR" },
+  { name: "Saint Barthelemy", code: "BL" },
+  { name: "Saint Martin", code: "MF" },
+  { name: "Sint Maarten", code: "SX" },
+  { name: "Taiwan", code: "TW" },
+  { name: "Turks and Caicos Islands", code: "TC" },
+  { name: "U.S. Virgin Islands", code: "VI" },
+  { name: "Vatican City", code: "VA" },
+  { name: "Wallis and Futuna", code: "WF" },
+  { name: "Western Sahara", code: "EH" }
+];
+
+const gameModes = {
+  un: {
+    countries,
+    scoreContext: "of 193 UN countries",
+    switchLabel: "non UN countries?"
+  },
+  nonUn: {
+    countries: nonUnCountries,
+    scoreContext: `of ${nonUnCountries.length} non-UN countries/territories`,
+    switchLabel: "UN countries?"
+  }
+};
+
 const flagEmojiEl = document.getElementById("flag-emoji");
 const optionsGridEl = document.getElementById("options-grid");
 const scoreEl = document.getElementById("score");
+const scoreContextEl = document.getElementById("score-context");
 const fiftyButtonEl = document.getElementById("fifty-button");
+const modeButtonEl = document.getElementById("mode-button");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
 const celebrationTitleEl = document.getElementById("celebration-title");
@@ -210,28 +263,62 @@ const celebrationCopyEl = document.getElementById("celebration-copy");
 const celebrationButtonEl = document.getElementById("celebration-button");
 
 const state = {
+  mode: "un",
   currentCountry: null,
   currentOptions: [],
+  deck: [],
   isLocked: false,
   isFiftyUsed: false,
+  isComplete: false,
   correct: 0,
   presented: 0
 };
 
 registerServiceWorker();
-startRound();
+resetGame("un");
 fiftyButtonEl.addEventListener("click", useFiftyFifty);
+modeButtonEl.addEventListener("click", () => {
+  resetGame(state.mode === "un" ? "nonUn" : "un");
+});
 celebrationButtonEl.addEventListener("click", () => {
   hideCelebration();
+  if (state.isComplete) {
+    return;
+  }
+
   startRound();
 });
 
+function resetGame(mode) {
+  state.mode = mode;
+  state.deck = shuffleList(getCurrentCountries());
+  state.correct = 0;
+  state.presented = 0;
+  state.isComplete = false;
+  startRound();
+}
+
 function startRound() {
-  state.currentCountry = sampleOne(countries);
+  const modeConfig = gameModes[state.mode];
+  if (state.deck.length === 0) {
+    state.isLocked = true;
+    optionsGridEl.innerHTML = "";
+    fiftyButtonEl.disabled = true;
+    flagEmojiEl.textContent = "Done";
+    state.isComplete = true;
+    renderScore();
+    showCompletion();
+    return;
+  }
+
+  state.currentCountry = state.deck.pop();
   state.currentOptions = buildOptions(state.currentCountry);
   state.isLocked = false;
   state.isFiftyUsed = false;
+  state.isComplete = false;
   fiftyButtonEl.disabled = false;
+  modeButtonEl.textContent = modeConfig.switchLabel;
+  scoreContextEl.textContent = modeConfig.scoreContext;
 
   flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
   renderOptions(state.currentOptions);
@@ -239,13 +326,18 @@ function startRound() {
 }
 
 function buildOptions(correctCountry) {
+  const sourceCountries = getCurrentCountries();
   const blockedCodes = getLookalikeBlockedCodes(correctCountry.code);
-  const distractors = shuffleList(countries.filter((country) => {
+  const distractors = shuffleList(sourceCountries.filter((country) => {
     return country.code !== correctCountry.code && !blockedCodes.has(country.code);
   }))
     .slice(0, 19);
   return [correctCountry, ...distractors]
     .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function getCurrentCountries() {
+  return gameModes[state.mode].countries;
 }
 
 function getLookalikeBlockedCodes(countryCode) {
@@ -335,6 +427,15 @@ function showCelebration(isCorrect, chosenName) {
   celebrationCopyEl.textContent = isCorrect
     ? `${state.currentCountry.name} is right.`
     : `You chose ${chosenName}.`;
+  celebrationEl.classList.add("show");
+  celebrationEl.setAttribute("aria-hidden", "false");
+}
+
+function showCompletion() {
+  celebrationEl.classList.remove("wrong");
+  celebrationKickerEl.textContent = "Complete";
+  celebrationTitleEl.textContent = "Full Set Done";
+  celebrationCopyEl.textContent = `You finished ${gameModes[state.mode].scoreContext}. Restart the app to play this set again.`;
   celebrationEl.classList.add("show");
   celebrationEl.setAttribute("aria-hidden", "false");
 }

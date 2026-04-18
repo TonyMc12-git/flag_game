@@ -1,10 +1,10 @@
-const CACHE_NAME = "flag-game-pwa-v5";
+const CACHE_NAME = "flag-game-pwa-v6";
 
 const APP_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260418-allcountries1",
-  "./app.js?v=20260418-allcountries1",
+  "./styles.css?v=20260418-modes1",
+  "./app.js?v=20260418-modes1",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg"
