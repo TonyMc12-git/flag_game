@@ -124,6 +124,7 @@ const countries = [
 const flagEmojiEl = document.getElementById("flag-emoji");
 const optionsGridEl = document.getElementById("options-grid");
 const scoreEl = document.getElementById("score");
+const fiftyButtonEl = document.getElementById("fifty-button");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
 const celebrationTitleEl = document.getElementById("celebration-title");
@@ -132,13 +133,16 @@ const celebrationButtonEl = document.getElementById("celebration-button");
 
 const state = {
   currentCountry: null,
+  currentOptions: [],
   isLocked: false,
+  isFiftyUsed: false,
   correct: 0,
   presented: 0
 };
 
 registerServiceWorker();
 startRound();
+fiftyButtonEl.addEventListener("click", useFiftyFifty);
 celebrationButtonEl.addEventListener("click", () => {
   hideCelebration();
   startRound();
@@ -146,17 +150,21 @@ celebrationButtonEl.addEventListener("click", () => {
 
 function startRound() {
   state.currentCountry = sampleOne(countries);
+  state.currentOptions = buildOptions(state.currentCountry);
   state.isLocked = false;
+  state.isFiftyUsed = false;
+  fiftyButtonEl.disabled = false;
 
   flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
-  renderOptions(buildOptions(state.currentCountry));
+  renderOptions(state.currentOptions);
   renderScore();
 }
 
 function buildOptions(correctCountry) {
   const distractors = shuffleList(countries.filter((country) => country.code !== correctCountry.code))
     .slice(0, 19);
-  return shuffleList([correctCountry, ...distractors]);
+  return [correctCountry, ...distractors]
+    .sort((left, right) => left.name.localeCompare(right.name));
 }
 
 function renderOptions(options) {
@@ -167,6 +175,7 @@ function renderOptions(options) {
     button.type = "button";
     button.className = "option-button";
     button.textContent = country.name;
+    button.dataset.countryCode = country.code;
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       button.classList.add("pressing");
@@ -188,6 +197,7 @@ function chooseCountry(country, button) {
   }
 
   state.isLocked = true;
+  fiftyButtonEl.disabled = true;
   const isCorrect = country.code === state.currentCountry.code;
   state.presented += 1;
   if (isCorrect) {
@@ -207,6 +217,25 @@ function chooseCountry(country, button) {
 
   renderScore();
   showCelebration(isCorrect, country.name);
+}
+
+function useFiftyFifty() {
+  if (state.isLocked || state.isFiftyUsed) {
+    return;
+  }
+
+  state.isFiftyUsed = true;
+  fiftyButtonEl.disabled = true;
+
+  const wrongButtons = [...optionsGridEl.querySelectorAll(".option-button")]
+    .filter((button) => button.dataset.countryCode !== state.currentCountry.code);
+
+  shuffleList(wrongButtons)
+    .slice(0, 10)
+    .forEach((button) => {
+      button.disabled = true;
+      button.classList.add("eliminated");
+    });
 }
 
 function showCelebration(isCorrect, chosenName) {
