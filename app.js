@@ -299,6 +299,8 @@ const duplicateFlagGroups = [
   }
 ];
 
+const APP_VERSION = "20260418-updates1";
+
 const gameModes = {
   un: {
     type: "single",
@@ -660,7 +662,62 @@ function registerServiceWorker() {
     return;
   }
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  let isRefreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (isRefreshing) {
+      return;
+    }
+
+    isRefreshing = true;
+    window.location.reload();
   });
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`).then((registration) => {
+      watchForServiceWorkerUpdate(registration);
+      checkForAppUpdate(registration);
+    }).catch(() => {});
+  });
+
+  window.addEventListener("pageshow", () => {
+    checkForAppUpdate();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkForAppUpdate();
+    }
+  });
+}
+
+function watchForServiceWorkerUpdate(registration) {
+  registration.addEventListener("updatefound", () => {
+    const installingWorker = registration.installing;
+    if (!installingWorker) {
+      return;
+    }
+
+    installingWorker.addEventListener("statechange", () => {
+      if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
+        installingWorker.postMessage({ type: "SKIP_WAITING" });
+      }
+    });
+  });
+}
+
+function checkForAppUpdate(registration) {
+  const updateRegistration = registration
+    ? Promise.resolve(registration)
+    : navigator.serviceWorker.getRegistration();
+
+  updateRegistration.then((activeRegistration) => {
+    if (!activeRegistration) {
+      return;
+    }
+
+    activeRegistration.update().catch(() => {});
+    if (activeRegistration.waiting) {
+      activeRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
+    }
+  }).catch(() => {});
 }
