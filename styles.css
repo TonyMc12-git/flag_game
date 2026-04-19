@@ -63,6 +63,7 @@ button {
   display: flex;
   align-items: stretch;
   gap: 8px;
+  min-width: 0;
 }
 
 h1 {
@@ -252,78 +253,12 @@ h1 {
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   font-size: clamp(7.2rem, 28.8vw, 14.4rem);
   line-height: 1.04;
-  filter: contrast(1.08) saturate(1.08);
+  filter: contrast(1.22) saturate(1.18);
   text-shadow: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
-}
-
-.flag-art {
-  position: relative;
-  width: min(330px, 72vw);
-  aspect-ratio: 3 / 2;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 7px;
-  border: 1px solid rgba(19, 37, 27, 0.18);
-  box-shadow: 0 5px 0 rgba(8, 30, 18, 0.08);
-  filter: contrast(1.12) saturate(1.12);
-}
-
-.flag-qa {
-  background: linear-gradient(90deg, #ffffff 0 30%, #8a1538 30% 100%);
-}
-
-.flag-bh {
-  background: linear-gradient(90deg, #ffffff 0 30%, #ce1126 30% 100%);
-}
-
-.flag-zigzag {
-  position: absolute;
-  inset: 0 auto 0 29.5%;
-  width: 18%;
-  background: #8a1538;
-  clip-path: polygon(0 0, 100% 5.56%, 0 11.11%, 100% 16.67%, 0 22.22%, 100% 27.78%, 0 33.33%, 100% 38.89%, 0 44.44%, 100% 50%, 0 55.56%, 100% 61.11%, 0 66.67%, 100% 72.22%, 0 77.78%, 100% 83.33%, 0 88.89%, 100% 94.44%, 0 100%);
-}
-
-.flag-bh .flag-zigzag {
-  background: #ce1126;
-  clip-path: polygon(0 0, 100% 10%, 0 20%, 100% 30%, 0 40%, 100% 50%, 0 60%, 100% 70%, 0 80%, 100% 90%, 0 100%);
-}
-
-.flag-lv {
-  background: linear-gradient(180deg, #9e1b34 0 40%, #ffffff 40% 60%, #9e1b34 60% 100%);
-}
-
-.flag-np {
-  width: min(250px, 54vw);
-  aspect-ratio: 0.82 / 1;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  overflow: visible;
-}
-
-.flag-np .nepal-top,
-.flag-np .nepal-bottom {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  background: #dc143c;
-  filter: drop-shadow(0 0 0 #003893);
-}
-
-.flag-np .nepal-top {
-  top: 0;
-  height: 58%;
-  clip-path: polygon(0 0, 0 100%, 84% 100%, 18% 52%, 84% 52%);
-}
-
-.flag-np .nepal-bottom {
-  top: 39%;
-  height: 61%;
-  clip-path: polygon(0 0, 0 100%, 100% 100%, 21% 42%, 100% 42%);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .options-grid {
@@ -536,20 +471,27 @@ h1 {
   }
 
   .top-bar {
+    display: grid;
+    grid-template-columns: 108px minmax(60px, 72px) minmax(124px, 1fr);
     align-items: start;
-    gap: 5px;
+    gap: 4px;
+    width: 100%;
   }
 
   .top-actions {
+    display: contents;
     gap: 4px;
   }
 
   h1 {
-    font-size: 1.2rem;
+    font-size: 1.08rem;
   }
 
   .title-block {
-    width: 112px;
+    grid-column: 1;
+    width: 108px;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .player-stats {
@@ -559,7 +501,7 @@ h1 {
   }
 
   .player-stats span {
-    grid-template-columns: 32px 62px;
+    grid-template-columns: 31px 61px;
     min-height: 0.7rem;
   }
 
@@ -568,18 +510,20 @@ h1 {
   }
 
   .end-game-button {
-    width: 98px;
+    width: 94px;
     min-height: 19px;
     padding: 2px 5px;
     font-size: 0.6rem;
   }
 
   .score-card {
-    min-width: 136px;
+    grid-column: 3;
+    width: 100%;
+    min-width: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3px;
-    padding: 4px;
+    gap: 2px;
+    padding: 3px;
     text-align: center;
   }
 
@@ -595,7 +539,7 @@ h1 {
   .score-context {
     align-self: center;
     margin-top: 0;
-    font-size: 0.96rem;
+    font-size: 0.74rem;
     line-height: 1;
   }
 
@@ -604,13 +548,14 @@ h1 {
     margin-top: 0;
     min-height: 25px;
     padding: 4px 5px;
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     line-height: 1;
   }
 
   .fifty-button {
-    width: 76px;
-    min-width: 76px;
+    grid-column: 2;
+    width: 100%;
+    min-width: 0;
     padding: 4px 5px;
     border-radius: 10px;
     font-size: 0.82rem;
@@ -629,14 +574,6 @@ h1 {
 
   .flag-emoji {
     font-size: clamp(7.4rem, 42.3vw, 11.4rem);
-  }
-
-  .flag-art {
-    width: min(260px, 68vw);
-  }
-
-  .flag-np {
-    width: min(190px, 50vw);
   }
 
   .spicy-instruction {
@@ -677,6 +614,11 @@ h1 {
 }
 
 @media (max-width: 380px) {
+  .top-bar {
+    grid-template-columns: 100px minmax(56px, 68px) minmax(116px, 1fr);
+    gap: 3px;
+  }
+
   .option-button {
     font-size: clamp(0.84rem, 3.8vw, 1rem);
   }
@@ -686,7 +628,7 @@ h1 {
   }
 
   .score-card {
-    min-width: 128px;
+    min-width: 0;
   }
 
   h1 {
@@ -694,7 +636,7 @@ h1 {
   }
 
   .title-block {
-    width: 102px;
+    width: 100px;
   }
 
   .player-stats {
@@ -702,7 +644,7 @@ h1 {
   }
 
   .player-stats span {
-    grid-template-columns: 29px 57px;
+    grid-template-columns: 28px 56px;
   }
 
   .player-stats strong {
@@ -710,7 +652,7 @@ h1 {
   }
 
   .end-game-button {
-    width: 90px;
+    width: 88px;
   }
 
   .spicy-instruction {

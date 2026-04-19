@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-timer1";
+const APP_VERSION = "20260419-fit1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -436,7 +436,6 @@ function startRound() {
     fiftyButtonEl.disabled = true;
     document.body.classList.remove("duplicate-mode");
     fiftyButtonEl.classList.remove("confirm-button");
-    flagEmojiEl.className = "flag-emoji";
     flagEmojiEl.textContent = "Done";
     state.isComplete = true;
     renderScore();
@@ -464,7 +463,7 @@ function startRound() {
   scoreContextEl.textContent = modeConfig.scoreContext;
   fitControlText();
 
-  renderFlag(state.currentCountry.code);
+  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
   renderOptions(state.currentOptions);
   renderScore();
   startRoundTimer();
@@ -857,23 +856,6 @@ function fitTextToBox(element, options = {}) {
 
 function doesTextOverflow(element) {
   return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1;
-}
-
-function renderFlag(code) {
-  flagEmojiEl.className = "flag-emoji";
-  flagEmojiEl.innerHTML = "";
-
-  if (["NP", "QA", "BH", "LV"].includes(code)) {
-    flagEmojiEl.classList.add("flag-art", `flag-${code.toLowerCase()}`);
-    if (code === "NP") {
-      flagEmojiEl.innerHTML = '<span class="nepal-top"></span><span class="nepal-bottom"></span>';
-    } else if (code === "QA" || code === "BH") {
-      flagEmojiEl.innerHTML = '<span class="flag-zigzag"></span>';
-    }
-    return;
-  }
-
-  flagEmojiEl.textContent = countryCodeToFlag(code);
 }
 
 function countryCodeToFlag(code) {
