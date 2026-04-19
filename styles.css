@@ -412,7 +412,7 @@ h1 {
     margin-top: 0;
     min-height: 25px;
     padding: 4px 5px;
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     line-height: 1;
   }
 
@@ -421,7 +421,7 @@ h1 {
     min-width: 76px;
     padding: 4px 5px;
     border-radius: 10px;
-    font-size: 0.72rem;
+    font-size: 1.44rem;
     line-height: 0.95;
   }
 
@@ -441,7 +441,7 @@ h1 {
 
   .spicy-mode .spicy-instruction {
     width: min(250px, 72vw);
-    font-size: 1.86rem;
+    font-size: 0.93rem;
     line-height: 0.9;
   }
 
@@ -453,11 +453,12 @@ h1 {
     height: 100%;
     max-height: 100%;
     overflow: hidden;
+    padding-top: 6px;
   }
 
   .option-button {
     min-height: 0;
-    height: 70%;
+    height: 84%;
     align-self: center;
     max-width: 100%;
     padding: 0 3px;
@@ -470,7 +471,7 @@ h1 {
   }
 
   .option-button.long-option {
-    font-size: clamp(1.16rem, 5.1vw, 1.44rem);
+    font-size: clamp(0.58rem, 2.55vw, 0.72rem);
     line-height: 0.74;
   }
 
@@ -485,7 +486,7 @@ h1 {
   }
 
   .option-button.long-option {
-    font-size: clamp(1rem, 4.5vw, 1.24rem);
+    font-size: clamp(0.5rem, 2.25vw, 0.62rem);
   }
 
   .score-card {
@@ -498,6 +499,6 @@ h1 {
 
   .spicy-mode .spicy-instruction {
     width: min(220px, 68vw);
-    font-size: 1.56rem;
+    font-size: 0.78rem;
   }
 }

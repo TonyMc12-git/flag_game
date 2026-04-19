@@ -299,7 +299,7 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260419-tuning1";
+const APP_VERSION = "20260419-tuning2";
 
 const gameModes = {
   un: {
