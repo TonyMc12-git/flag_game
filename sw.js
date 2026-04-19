@@ -1,10 +1,12 @@
-const CACHE_NAME = "flag-game-pwa-v24";
+const CACHE_NAME = "flag-game-pwa-v25";
+const APP_VERSION = "20260419-autoupdate1";
 
 const APP_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260419-svg2",
-  "./app.js?v=20260419-svg2",
+  "./styles.css?v=20260419-autoupdate1",
+  "./app.js?v=20260419-autoupdate1",
+  "./version.json",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg"
@@ -24,13 +26,18 @@ self.addEventListener("activate", (event) => {
           .filter((key) => key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       );
-    }).then(() => self.clients.claim())
+    })
+      .then(() => self.clients.claim())
+      .then(() => refreshOpenClients())
   );
 });
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  }
+  if (event.data && event.data.type === "REFRESH_CLIENTS") {
+    event.waitUntil(refreshOpenClients());
   }
 });
 
@@ -57,6 +64,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (requestUrl.pathname.endsWith("/version.json")) {
+    event.respondWith(fetch(new Request(event.request, { cache: "reload" })));
+    return;
+  }
+
   event.respondWith(
     fetch(new Request(event.request, { cache: "reload" }))
       .then((response) => {
@@ -67,3 +79,21 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
+function refreshOpenClients() {
+  return self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    return Promise.all(clients.map((client) => {
+      const clientUrl = new URL(client.url);
+      if (clientUrl.origin !== self.location.origin) {
+        return Promise.resolve();
+      }
+
+      if (clientUrl.searchParams.get("app-version") === APP_VERSION) {
+        return client.postMessage({ type: "APP_UPDATED", version: APP_VERSION });
+      }
+
+      clientUrl.searchParams.set("app-version", APP_VERSION);
+      return client.navigate(clientUrl.href);
+    }));
+  });
+}

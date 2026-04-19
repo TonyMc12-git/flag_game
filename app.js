@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-svg2";
+const APP_VERSION = "20260419-autoupdate1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -903,6 +903,7 @@ function registerServiceWorker() {
   }
 
   let isRefreshing = false;
+  let lastVersionCheck = 0;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (isRefreshing) {
       return;
@@ -911,23 +912,62 @@ function registerServiceWorker() {
     isRefreshing = true;
     window.location.reload();
   });
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "APP_UPDATED" && event.data.version !== APP_VERSION) {
+      window.location.reload();
+    }
+  });
 
   window.addEventListener("load", () => {
     navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`).then((registration) => {
       watchForServiceWorkerUpdate(registration);
       checkForAppUpdate(registration);
+      checkVersionFile();
     }).catch(() => {});
   });
 
   window.addEventListener("pageshow", () => {
     checkForAppUpdate();
+    checkVersionFile();
   });
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       checkForAppUpdate();
+      checkVersionFile();
     }
   });
+
+  function checkVersionFile() {
+    const now = Date.now();
+    if (now - lastVersionCheck < 1500) {
+      return;
+    }
+
+    lastVersionCheck = now;
+    fetch(`./version.json?check=${now}`, { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((versionInfo) => {
+        if (!versionInfo || versionInfo.version === APP_VERSION) {
+          return;
+        }
+
+        caches.keys()
+          .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+          .finally(() => {
+            navigator.serviceWorker.getRegistration().then((registration) => {
+              if (registration && registration.waiting) {
+                registration.waiting.postMessage({ type: "SKIP_WAITING" });
+              }
+              if (registration && registration.active) {
+                registration.active.postMessage({ type: "REFRESH_CLIENTS" });
+              }
+              window.location.replace(`./index.html?app-version=${versionInfo.version}`);
+            });
+          });
+      })
+      .catch(() => {});
+  }
 }
 
 function watchForServiceWorkerUpdate(registration) {
