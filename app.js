@@ -304,9 +304,10 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-stableupdate1";
+const APP_VERSION = "20260419-preload1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
+const flagLoadStates = new Map();
 
 const gameModes = {
   combined: {
@@ -411,6 +412,7 @@ function resetGame(mode) {
   modeButtonEl.disabled = false;
   renderPoints();
   renderTimer(0);
+  preloadUpcomingFlags(24);
   startRound();
 }
 
@@ -467,6 +469,7 @@ function startRound() {
   renderFlagImage(state.currentCountry);
   renderOptions(state.currentOptions);
   renderScore();
+  preloadUpcomingFlags(24);
   startRoundTimer();
 }
 
@@ -858,21 +861,50 @@ function doesTextOverflow(element) {
   return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1;
 }
 
+function preloadUpcomingFlags(count) {
+  state.deck
+    .slice(Math.max(0, state.deck.length - count))
+    .forEach((country) => {
+      preloadFlagImage(country.code);
+    });
+}
+
+function preloadFlagImage(code) {
+  const normalizedCode = code.toLowerCase();
+  if (flagLoadStates.has(normalizedCode)) {
+    return flagLoadStates.get(normalizedCode);
+  }
+
+  const image = new Image();
+  const loadPromise = new Promise((resolve) => {
+    image.addEventListener("load", () => resolve(true), { once: true });
+    image.addEventListener("error", () => resolve(false), { once: true });
+  });
+  flagLoadStates.set(normalizedCode, loadPromise);
+  image.src = getFlagUrl(code);
+  return loadPromise;
+}
+
 function renderFlagImage(country) {
-  const code = country.code.toLowerCase();
   flagEmojiEl.textContent = "";
   flagEmojiEl.innerHTML = "";
-  flagEmojiEl.style.backgroundImage = `url("https://flagcdn.com/${code}.svg")`;
+  flagEmojiEl.style.backgroundImage = `url("${getFlagUrl(country.code)}")`;
   flagEmojiEl.setAttribute("role", "img");
   flagEmojiEl.setAttribute("aria-label", `${country.name} flag`);
 
-  const probe = new Image();
-  probe.addEventListener("error", () => {
+  preloadFlagImage(country.code).then((loaded) => {
+    if (state.currentCountry !== country || loaded) {
+      return;
+    }
+
     flagEmojiEl.style.backgroundImage = "";
     flagEmojiEl.innerHTML = "";
     flagEmojiEl.textContent = countryCodeToFlag(country.code);
-  }, { once: true });
-  probe.src = `https://flagcdn.com/${code}.svg`;
+  });
+}
+
+function getFlagUrl(code) {
+  return `https://flagcdn.com/${code.toLowerCase()}.svg`;
 }
 
 function countryCodeToFlag(code) {
