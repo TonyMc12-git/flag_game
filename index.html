@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  <link rel="stylesheet" href="styles.css?v=20260419-score1">
+  <link rel="stylesheet" href="styles.css?v=20260419-timer1">
 </head>
 <body>
   <main class="app-shell">
@@ -21,9 +21,10 @@
         <div class="title-block">
           <h1>Flag Game</h1>
           <div class="player-stats" aria-label="Points and timer">
-            <span>Pts <strong id="points-score">0</strong></span>
-            <span>Time <strong id="round-timer">0.0s</strong></span>
-            <span>Best <strong id="high-score">0</strong></span>
+            <span><em>Pts</em> <strong id="points-score">0</strong></span>
+            <span><em>Time</em> <strong id="round-timer">000.0s</strong></span>
+            <span><em>Best</em> <strong id="high-score">0</strong></span>
+            <button class="end-game-button" id="end-game-button" type="button">That'll do</button>
           </div>
         </div>
         <div class="top-actions">
@@ -59,6 +60,6 @@
 
   <div class="bonus-toast" id="bonus-toast" aria-live="assertive" aria-hidden="true"></div>
 
-  <script src="app.js?v=20260419-score1"></script>
+  <script src="app.js?v=20260419-timer1"></script>
 </body>
 </html>

@@ -304,8 +304,9 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-score1";
-const HIGH_SCORE_KEY = "flagGameHighScore";
+const APP_VERSION = "20260419-timer1";
+const HIGH_SCORE_PREFIX = "flagGameHighScore";
+const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
 const gameModes = {
   combined: {
@@ -331,6 +332,7 @@ const roundTimerEl = document.getElementById("round-timer");
 const highScoreEl = document.getElementById("high-score");
 const fiftyButtonEl = document.getElementById("fifty-button");
 const modeButtonEl = document.getElementById("mode-button");
+const endGameButtonEl = document.getElementById("end-game-button");
 const bonusToastEl = document.getElementById("bonus-toast");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
@@ -349,12 +351,13 @@ const state = {
   feedbackReadyAt: 0,
   bonusTimer: null,
   timerId: null,
-  roundStartedAt: 0,
-  elapsedMs: 0,
+  timerSegmentStartedAt: 0,
+  streakElapsedMs: 0,
+  resetTimerOnNextRound: false,
   points: 0,
-  highScore: readHighScore(),
+  highScore: 0,
   correctStreak: 0,
-  streakDurations: [],
+  isEnded: false,
   isLocked: false,
   isFiftyUsed: false,
   isComplete: false,
@@ -369,6 +372,7 @@ fiftyButtonEl.addEventListener("click", useFiftyFifty);
 modeButtonEl.addEventListener("click", () => {
   resetGame(state.mode === "combined" ? "un" : "combined");
 });
+endGameButtonEl.addEventListener("click", handleEndGame);
 celebrationButtonEl.addEventListener("click", () => {
   if (Date.now() < state.feedbackReadyAt) {
     return;
@@ -391,19 +395,39 @@ window.addEventListener("resize", () => {
 function resetGame(mode) {
   stopRoundTimer();
   state.mode = mode;
-  state.deck = shuffleList(gameModes[state.mode].countries);
+  state.deck = buildDeck(gameModes[state.mode].countries);
   state.correct = 0;
   state.presented = 0;
   state.points = 0;
+  state.highScore = readHighScore(state.mode);
   state.correctStreak = 0;
-  state.streakDurations = [];
+  state.streakElapsedMs = 0;
+  state.resetTimerOnNextRound = false;
   state.isComplete = false;
+  state.isEnded = false;
   state.selectedCodes = new Set();
+  endGameButtonEl.textContent = "That'll do";
+  endGameButtonEl.classList.remove("new-game");
+  modeButtonEl.disabled = false;
   renderPoints();
+  renderTimer(0);
   startRound();
 }
 
+function buildDeck(sourceCountries) {
+  const testingCountries = TEMPORARY_FIRST_CODES
+    .map((code) => sourceCountries.find((country) => country.code === code))
+    .filter(Boolean);
+  const testingCodes = new Set(testingCountries.map((country) => country.code));
+  const remainingCountries = shuffleList(sourceCountries.filter((country) => !testingCodes.has(country.code)));
+  return [...remainingCountries, ...testingCountries.reverse()];
+}
+
 function startRound() {
+  if (state.isEnded) {
+    return;
+  }
+
   const modeConfig = gameModes[state.mode];
   if (state.deck.length === 0) {
     state.isLocked = true;
@@ -412,6 +436,7 @@ function startRound() {
     fiftyButtonEl.disabled = true;
     document.body.classList.remove("duplicate-mode");
     fiftyButtonEl.classList.remove("confirm-button");
+    flagEmojiEl.className = "flag-emoji";
     flagEmojiEl.textContent = "Done";
     state.isComplete = true;
     renderScore();
@@ -439,7 +464,7 @@ function startRound() {
   scoreContextEl.textContent = modeConfig.scoreContext;
   fitControlText();
 
-  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
+  renderFlag(state.currentCountry.code);
   renderOptions(state.currentOptions);
   renderScore();
   startRoundTimer();
@@ -673,14 +698,37 @@ function renderScore() {
   scoreEl.textContent = `${state.correct} / ${state.presented}`;
 }
 
+function handleEndGame() {
+  if (state.isEnded) {
+    resetGame(state.mode);
+    return;
+  }
+
+  state.isEnded = true;
+  state.isLocked = true;
+  stopRoundTimer();
+  updateHighScore();
+  renderPoints();
+  fiftyButtonEl.disabled = true;
+  modeButtonEl.disabled = true;
+  endGameButtonEl.textContent = "New Game";
+  endGameButtonEl.classList.add("new-game");
+  [...optionsGridEl.querySelectorAll(".option-button")].forEach((button) => {
+    button.disabled = true;
+  });
+}
+
 function startRoundTimer() {
   stopRoundTimer();
-  state.elapsedMs = 0;
-  state.roundStartedAt = performance.now();
-  renderTimer(0);
+  if (state.resetTimerOnNextRound) {
+    state.streakElapsedMs = 0;
+    state.resetTimerOnNextRound = false;
+  }
+
+  state.timerSegmentStartedAt = performance.now();
+  renderTimer(state.streakElapsedMs);
   state.timerId = window.setInterval(() => {
-    state.elapsedMs = performance.now() - state.roundStartedAt;
-    renderTimer(state.elapsedMs);
+    renderTimer(state.streakElapsedMs + performance.now() - state.timerSegmentStartedAt);
   }, 100);
 }
 
@@ -690,18 +738,19 @@ function stopRoundTimer() {
     state.timerId = null;
   }
 
-  if (!state.roundStartedAt) {
-    return state.elapsedMs || 0;
+  if (!state.timerSegmentStartedAt) {
+    return state.streakElapsedMs || 0;
   }
 
-  state.elapsedMs = performance.now() - state.roundStartedAt;
-  state.roundStartedAt = 0;
-  renderTimer(state.elapsedMs);
-  return state.elapsedMs;
+  state.streakElapsedMs += performance.now() - state.timerSegmentStartedAt;
+  state.timerSegmentStartedAt = 0;
+  renderTimer(state.streakElapsedMs);
+  return state.streakElapsedMs;
 }
 
 function renderTimer(milliseconds) {
-  roundTimerEl.textContent = `${(milliseconds / 1000).toFixed(1)}s`;
+  const secondsText = (milliseconds / 1000).toFixed(1).padStart(5, "0");
+  roundTimerEl.textContent = `${secondsText}s`;
 }
 
 function applyScoring(isCorrect, basePoints, roundMs) {
@@ -710,23 +759,23 @@ function applyScoring(isCorrect, basePoints, roundMs) {
   if (isCorrect) {
     state.points += basePoints;
     state.correctStreak += 1;
-    state.streakDurations.push(roundMs);
 
     if (state.correctStreak % 10 === 0) {
       state.points += 100;
       bonusMessages.push("+100 streak bonus");
 
-      const lastTenSeconds = state.streakDurations
-        .slice(-10)
-        .reduce((total, duration) => total + duration, 0) / 1000;
-      if (lastTenSeconds <= 10) {
-        state.points += 100;
-        bonusMessages.push("+100 10-in-10 bonus");
+      const streakSeconds = roundMs / 1000;
+      if (streakSeconds <= 10) {
+        state.points += 400;
+        bonusMessages.push("+400 10-in-10 bonus");
+      } else if (streakSeconds <= 20) {
+        state.points += 200;
+        bonusMessages.push("+200 10-in-20 bonus");
       }
     }
   } else {
     state.correctStreak = 0;
-    state.streakDurations = [];
+    state.resetTimerOnNextRound = true;
   }
 
   updateHighScore();
@@ -749,19 +798,23 @@ function updateHighScore() {
 
   state.highScore = state.points;
   try {
-    localStorage.setItem(HIGH_SCORE_KEY, String(state.highScore));
+    localStorage.setItem(getHighScoreKey(state.mode), String(state.highScore));
   } catch {
     // Some private browsing modes can block localStorage writes.
   }
 }
 
-function readHighScore() {
+function readHighScore(mode) {
   try {
-    const storedScore = Number(localStorage.getItem(HIGH_SCORE_KEY));
+    const storedScore = Number(localStorage.getItem(getHighScoreKey(mode)));
     return Number.isFinite(storedScore) && storedScore > 0 ? storedScore : 0;
   } catch {
     return 0;
   }
+}
+
+function getHighScoreKey(mode) {
+  return `${HIGH_SCORE_PREFIX}:${mode}`;
 }
 
 function showBonusToast(message) {
@@ -804,6 +857,23 @@ function fitTextToBox(element, options = {}) {
 
 function doesTextOverflow(element) {
   return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1;
+}
+
+function renderFlag(code) {
+  flagEmojiEl.className = "flag-emoji";
+  flagEmojiEl.innerHTML = "";
+
+  if (["NP", "QA", "BH", "LV"].includes(code)) {
+    flagEmojiEl.classList.add("flag-art", `flag-${code.toLowerCase()}`);
+    if (code === "NP") {
+      flagEmojiEl.innerHTML = '<span class="nepal-top"></span><span class="nepal-bottom"></span>';
+    } else if (code === "QA" || code === "BH") {
+      flagEmojiEl.innerHTML = '<span class="flag-zigzag"></span>';
+    }
+    return;
+  }
+
+  flagEmojiEl.textContent = countryCodeToFlag(code);
 }
 
 function countryCodeToFlag(code) {
