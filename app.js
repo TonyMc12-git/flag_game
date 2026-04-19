@@ -304,9 +304,8 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-preload1";
+const APP_VERSION = "20260419-random1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
-const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 const flagLoadStates = new Map();
 
 const gameModes = {
@@ -417,12 +416,7 @@ function resetGame(mode) {
 }
 
 function buildDeck(sourceCountries) {
-  const testingCountries = TEMPORARY_FIRST_CODES
-    .map((code) => sourceCountries.find((country) => country.code === code))
-    .filter(Boolean);
-  const testingCodes = new Set(testingCountries.map((country) => country.code));
-  const remainingCountries = shuffleList(sourceCountries.filter((country) => !testingCodes.has(country.code)));
-  return [...remainingCountries, ...testingCountries.reverse()];
+  return shuffleList(sourceCountries);
 }
 
 function startRound() {
