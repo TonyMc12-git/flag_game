@@ -299,7 +299,7 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260418-centered-grid1";
+const APP_VERSION = "20260419-tuning1";
 
 const gameModes = {
   un: {
@@ -406,7 +406,7 @@ function startRound() {
   const isSpicyMode = modeConfig.type === "multi";
   document.body.classList.toggle("spicy-mode", isSpicyMode);
   fiftyButtonEl.classList.toggle("confirm-button", isSpicyMode);
-  fiftyButtonEl.textContent = isSpicyMode ? "Confirm" : "50/50";
+  fiftyButtonEl.textContent = isSpicyMode ? "Confirm" : "Use your 50/50?";
   fiftyButtonEl.disabled = false;
   modeButtonEl.textContent = isSpicyMode ? "UN countries" : modeConfig.switchLabel;
   spicyButtonEl.textContent = isSpicyMode ? "non-UN countries" : "Spicy";

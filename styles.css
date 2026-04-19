@@ -404,7 +404,7 @@ h1 {
   .score-context {
     align-self: center;
     margin-top: 0;
-    font-size: 0.52rem;
+    font-size: 1.04rem;
     line-height: 1;
   }
 
@@ -412,15 +412,17 @@ h1 {
     margin-top: 0;
     min-height: 25px;
     padding: 4px 5px;
-    font-size: 0.55rem;
+    font-size: 1.1rem;
     line-height: 1;
   }
 
   .fifty-button {
+    width: 76px;
     min-width: 76px;
-    padding: 5px 6px;
+    padding: 4px 5px;
     border-radius: 10px;
-    font-size: 0.82rem;
+    font-size: 0.72rem;
+    line-height: 0.95;
   }
 
   .confirm-button {
@@ -428,6 +430,7 @@ h1 {
   }
 
   .flag-card {
+    margin-top: 5px;
     width: min(470px, 98vw);
     max-width: 100%;
   }
@@ -438,8 +441,8 @@ h1 {
 
   .spicy-mode .spicy-instruction {
     width: min(250px, 72vw);
-    font-size: 0.62rem;
-    line-height: 0.92;
+    font-size: 1.86rem;
+    line-height: 0.9;
   }
 
   .options-grid {
@@ -454,7 +457,8 @@ h1 {
 
   .option-button {
     min-height: 0;
-    height: 100%;
+    height: 70%;
+    align-self: center;
     max-width: 100%;
     padding: 0 3px;
     border-radius: 5px;
@@ -466,7 +470,7 @@ h1 {
   }
 
   .option-button.long-option {
-    font-size: clamp(0.58rem, 2.55vw, 0.72rem);
+    font-size: clamp(1.16rem, 5.1vw, 1.44rem);
     line-height: 0.74;
   }
 
@@ -481,7 +485,7 @@ h1 {
   }
 
   .option-button.long-option {
-    font-size: clamp(0.5rem, 2.25vw, 0.62rem);
+    font-size: clamp(1rem, 4.5vw, 1.24rem);
   }
 
   .score-card {
@@ -494,6 +498,6 @@ h1 {
 
   .spicy-mode .spicy-instruction {
     width: min(220px, 68vw);
-    font-size: 0.52rem;
+    font-size: 1.56rem;
   }
 }
