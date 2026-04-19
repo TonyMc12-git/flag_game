@@ -171,7 +171,10 @@ h1 {
 }
 
 .fifty-button {
-  min-width: 82px;
+  width: 92px;
+  min-width: 92px;
+  max-width: 92px;
+  min-height: 54px;
   padding: 10px 12px;
   border: 1px solid rgba(19, 37, 27, 0.14);
   border-radius: 12px;
@@ -195,7 +198,9 @@ h1 {
 
 .confirm-button {
   background: #f2c14e;
-  min-width: 104px;
+  width: 92px;
+  min-width: 92px;
+  max-width: 92px;
 }
 
 .score-label {
@@ -564,6 +569,8 @@ h1 {
     grid-column: 2;
     width: 100%;
     min-width: 0;
+    max-width: none;
+    min-height: 39px;
     padding: 4px 5px;
     border-radius: 10px;
     font-size: 0.82rem;
@@ -571,7 +578,9 @@ h1 {
   }
 
   .confirm-button {
-    min-width: 76px;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
   }
 
   .flag-stage {

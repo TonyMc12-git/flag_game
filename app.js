@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-flagfit2";
+const APP_VERSION = "20260419-stableupdate1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -953,19 +953,18 @@ function registerServiceWorker() {
           return;
         }
 
-        caches.keys()
-          .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-          .finally(() => {
-            navigator.serviceWorker.getRegistration().then((registration) => {
-              if (registration && registration.waiting) {
-                registration.waiting.postMessage({ type: "SKIP_WAITING" });
-              }
-              if (registration && registration.active) {
-                registration.active.postMessage({ type: "REFRESH_CLIENTS" });
-              }
-              window.location.replace(`./index.html?app-version=${latestVersion}`);
-            });
-          });
+        if (sessionStorage.getItem("pendingAppVersion") === latestVersion) {
+          return;
+        }
+
+        sessionStorage.setItem("pendingAppVersion", latestVersion);
+        navigator.serviceWorker.getRegistration().then((registration) => {
+          if (registration && registration.waiting) {
+            registration.waiting.postMessage({ type: "SKIP_WAITING" });
+          }
+        }).finally(() => {
+          window.location.replace(`./index.html?app-version=${latestVersion}`);
+        });
       })
       .catch(() => {});
   }
