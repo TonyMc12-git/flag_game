@@ -244,14 +244,16 @@ h1 {
   width: min(520px, 88vw);
   display: grid;
   place-items: center;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .flag-emoji {
-  display: block;
-  padding: 0.04em 0;
+  display: grid;
+  place-items: center;
+  width: min(430px, 82vw);
+  height: clamp(7.4rem, 28.8vw, 13.6rem);
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  font-size: clamp(7.2rem, 28.8vw, 14.4rem);
+  font-size: clamp(7.2rem, 28.8vw, 13.4rem);
   line-height: 1.04;
   filter: contrast(1.22) saturate(1.18);
   text-shadow: none;
@@ -259,6 +261,16 @@ h1 {
   text-rendering: geometricPrecision;
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+.flag-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: auto;
 }
 
 .options-grid {
@@ -573,7 +585,9 @@ h1 {
   }
 
   .flag-emoji {
-    font-size: clamp(7.4rem, 42.3vw, 11.4rem);
+    width: min(300px, 88vw);
+    height: clamp(6.6rem, 36vw, 10.2rem);
+    font-size: clamp(6.8rem, 39vw, 10.8rem);
   }
 
   .spicy-instruction {

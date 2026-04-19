@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-fit1";
+const APP_VERSION = "20260419-svg1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -436,6 +436,7 @@ function startRound() {
     fiftyButtonEl.disabled = true;
     document.body.classList.remove("duplicate-mode");
     fiftyButtonEl.classList.remove("confirm-button");
+    flagEmojiEl.innerHTML = "";
     flagEmojiEl.textContent = "Done";
     state.isComplete = true;
     renderScore();
@@ -463,7 +464,7 @@ function startRound() {
   scoreContextEl.textContent = modeConfig.scoreContext;
   fitControlText();
 
-  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
+  renderFlagImage(state.currentCountry);
   renderOptions(state.currentOptions);
   renderScore();
   startRoundTimer();
@@ -856,6 +857,24 @@ function fitTextToBox(element, options = {}) {
 
 function doesTextOverflow(element) {
   return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1;
+}
+
+function renderFlagImage(country) {
+  const code = country.code.toLowerCase();
+  flagEmojiEl.innerHTML = "";
+
+  const image = document.createElement("img");
+  image.className = "flag-image";
+  image.src = `https://flagcdn.com/${code}.svg`;
+  image.alt = `${country.name} flag`;
+  image.decoding = "async";
+  image.loading = "eager";
+  image.addEventListener("error", () => {
+    flagEmojiEl.innerHTML = "";
+    flagEmojiEl.textContent = countryCodeToFlag(country.code);
+  }, { once: true });
+
+  flagEmojiEl.appendChild(image);
 }
 
 function countryCodeToFlag(code) {
