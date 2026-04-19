@@ -299,26 +299,25 @@ const duplicateFlagGroups = [
   }
 ];
 
-const APP_VERSION = "20260419-tuning2";
+const combinedCountries = [...countries, ...nonUnCountries];
+const duplicateGroupsByFlagCode = new Map(
+  duplicateFlagGroups.map((group) => [group.flagCode, group])
+);
+
+const APP_VERSION = "20260419-combined1";
 
 const gameModes = {
+  combined: {
+    type: "single",
+    countries: combinedCountries,
+    scoreContext: `of ${combinedCountries.length} countries/territories`,
+    switchLabel: "UN countries only?"
+  },
   un: {
     type: "single",
     countries,
     scoreContext: "of 193 UN countries",
-    switchLabel: "non UN countries?"
-  },
-  nonUn: {
-    type: "single",
-    countries: nonUnCountries,
-    scoreContext: `of ${nonUnCountries.length} non-UN countries/territories`,
-    switchLabel: "UN countries?"
-  },
-  spicy: {
-    type: "multi",
-    countries: duplicateFlagGroups,
-    scoreContext: `of ${duplicateFlagGroups.length} spicy flags`,
-    switchLabel: "UN countries?"
+    switchLabel: "All countries?"
   }
 };
 
@@ -328,7 +327,6 @@ const scoreEl = document.getElementById("score");
 const scoreContextEl = document.getElementById("score-context");
 const fiftyButtonEl = document.getElementById("fifty-button");
 const modeButtonEl = document.getElementById("mode-button");
-const spicyButtonEl = document.getElementById("spicy-button");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
 const celebrationTitleEl = document.getElementById("celebration-title");
@@ -336,8 +334,9 @@ const celebrationCopyEl = document.getElementById("celebration-copy");
 const celebrationButtonEl = document.getElementById("celebration-button");
 
 const state = {
-  mode: "un",
+  mode: "combined",
   currentCountry: null,
+  currentDuplicateGroup: null,
   currentOptions: [],
   deck: [],
   selectedCodes: new Set(),
@@ -351,13 +350,10 @@ const state = {
 };
 
 registerServiceWorker();
-resetGame("un");
+resetGame("combined");
 fiftyButtonEl.addEventListener("click", useFiftyFifty);
 modeButtonEl.addEventListener("click", () => {
-  resetGame(state.mode === "un" ? "nonUn" : "un");
-});
-spicyButtonEl.addEventListener("click", () => {
-  resetGame(state.mode === "spicy" ? "nonUn" : "spicy");
+  resetGame(state.mode === "combined" ? "un" : "combined");
 });
 celebrationButtonEl.addEventListener("click", () => {
   if (Date.now() < state.feedbackReadyAt) {
@@ -370,6 +366,12 @@ celebrationButtonEl.addEventListener("click", () => {
   }
 
   startRound();
+});
+window.addEventListener("resize", () => {
+  window.requestAnimationFrame(() => {
+    fitOptionText();
+    fitControlText();
+  });
 });
 
 function resetGame(mode) {
@@ -388,6 +390,8 @@ function startRound() {
     state.isLocked = true;
     optionsGridEl.innerHTML = "";
     fiftyButtonEl.disabled = true;
+    document.body.classList.remove("duplicate-mode");
+    fiftyButtonEl.classList.remove("confirm-button");
     flagEmojiEl.textContent = "Done";
     state.isComplete = true;
     renderScore();
@@ -396,23 +400,26 @@ function startRound() {
   }
 
   state.currentCountry = state.deck.pop();
-  state.currentOptions = modeConfig.type === "multi"
-    ? buildSpicyOptions(state.currentCountry)
+  state.currentDuplicateGroup = state.mode === "combined"
+    ? duplicateGroupsByFlagCode.get(state.currentCountry.code) || null
+    : null;
+  state.currentOptions = state.currentDuplicateGroup
+    ? buildDuplicateOptions(state.currentDuplicateGroup)
     : buildOptions(state.currentCountry);
   state.isLocked = false;
   state.isFiftyUsed = false;
   state.isComplete = false;
   state.selectedCodes = new Set();
-  const isSpicyMode = modeConfig.type === "multi";
-  document.body.classList.toggle("spicy-mode", isSpicyMode);
-  fiftyButtonEl.classList.toggle("confirm-button", isSpicyMode);
-  fiftyButtonEl.textContent = isSpicyMode ? "Confirm" : "Use your 50/50?";
+  const isDuplicateRound = Boolean(state.currentDuplicateGroup);
+  document.body.classList.toggle("duplicate-mode", isDuplicateRound);
+  fiftyButtonEl.classList.toggle("confirm-button", isDuplicateRound);
+  fiftyButtonEl.textContent = isDuplicateRound ? "Confirm" : "Use your 50/50?";
   fiftyButtonEl.disabled = false;
-  modeButtonEl.textContent = isSpicyMode ? "UN countries" : modeConfig.switchLabel;
-  spicyButtonEl.textContent = isSpicyMode ? "non-UN countries" : "Spicy";
+  modeButtonEl.textContent = modeConfig.switchLabel;
   scoreContextEl.textContent = modeConfig.scoreContext;
+  fitControlText();
 
-  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.flagCode || state.currentCountry.code);
+  flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
   renderOptions(state.currentOptions);
   renderScore();
 }
@@ -428,9 +435,9 @@ function buildOptions(correctCountry) {
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
-function buildSpicyOptions(flagGroup) {
+function buildDuplicateOptions(flagGroup) {
   const correctCodes = new Set(flagGroup.correct.map((country) => country.code));
-  const distractors = shuffleList(nonUnCountries.filter((country) => !correctCodes.has(country.code)))
+  const distractors = shuffleList(combinedCountries.filter((country) => !correctCodes.has(country.code)))
     .slice(0, 20 - flagGroup.correct.length);
   return [...flagGroup.correct, ...distractors]
     .sort((left, right) => left.name.localeCompare(right.name));
@@ -464,8 +471,8 @@ function renderOptions(options) {
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       button.classList.add("pressing");
-      if (gameModes[state.mode].type === "multi") {
-        toggleSpicyChoice(country, button);
+      if (state.currentDuplicateGroup) {
+        toggleDuplicateChoice(country, button);
       } else {
         chooseCountry(country, button);
       }
@@ -478,9 +485,11 @@ function renderOptions(options) {
     });
     optionsGridEl.appendChild(button);
   });
+
+  window.requestAnimationFrame(fitOptionText);
 }
 
-function toggleSpicyChoice(country, button) {
+function toggleDuplicateChoice(country, button) {
   if (state.isLocked) {
     return;
   }
@@ -523,8 +532,8 @@ function chooseCountry(country, button) {
 }
 
 function useFiftyFifty() {
-  if (gameModes[state.mode].type === "multi") {
-    checkSpicySelection();
+  if (state.currentDuplicateGroup) {
+    checkDuplicateSelection();
     return;
   }
 
@@ -546,14 +555,14 @@ function useFiftyFifty() {
     });
 }
 
-function checkSpicySelection() {
+function checkDuplicateSelection() {
   if (state.isLocked) {
     return;
   }
 
   state.isLocked = true;
   fiftyButtonEl.disabled = true;
-  const correctCodes = new Set(state.currentCountry.correct.map((country) => country.code));
+  const correctCodes = new Set(state.currentDuplicateGroup.correct.map((country) => country.code));
   const missedCodes = [...correctCodes].filter((code) => !state.selectedCodes.has(code));
   const extraCodes = [...state.selectedCodes].filter((code) => !correctCodes.has(code));
   const isCorrect = missedCodes.length === 0 && extraCodes.length === 0;
@@ -572,7 +581,7 @@ function checkSpicySelection() {
   });
 
   renderScore();
-  showSpicyCelebration(isCorrect, missedCodes, extraCodes);
+  showDuplicateCelebration(isCorrect, missedCodes, extraCodes);
 }
 
 function showCelebration(isCorrect, chosenName) {
@@ -585,17 +594,17 @@ function showCelebration(isCorrect, chosenName) {
   showFeedback();
 }
 
-function showSpicyCelebration(isCorrect, missedCodes, extraCodes) {
+function showDuplicateCelebration(isCorrect, missedCodes, extraCodes) {
   celebrationEl.classList.toggle("wrong", !isCorrect);
   celebrationKickerEl.textContent = isCorrect ? "Correct" : "Answer";
-  celebrationTitleEl.textContent = isCorrect ? "Nice!" : state.currentCountry.name;
+  celebrationTitleEl.textContent = isCorrect ? "Nice!" : state.currentDuplicateGroup.name;
   celebrationCopyEl.textContent = isCorrect
     ? "You got every matching option."
-    : buildSpicyAnswerCopy(missedCodes, extraCodes);
+    : buildDuplicateAnswerCopy(missedCodes, extraCodes);
   showFeedback();
 }
 
-function buildSpicyAnswerCopy(missedCodes, extraCodes) {
+function buildDuplicateAnswerCopy(missedCodes, extraCodes) {
   const namesByCode = new Map(state.currentOptions.map((country) => [country.code, country.name]));
   const missedNames = missedCodes.map((code) => namesByCode.get(code)).filter(Boolean);
   const extraNames = extraCodes.map((code) => namesByCode.get(code)).filter(Boolean);
@@ -637,6 +646,37 @@ function hideCelebration() {
 
 function renderScore() {
   scoreEl.textContent = `${state.correct} / ${state.presented}`;
+}
+
+function fitOptionText() {
+  [...optionsGridEl.querySelectorAll(".option-button")].forEach((button) => {
+    fitTextToBox(button, {
+      minSize: button.classList.contains("long-option") ? 10 : 11,
+      step: 0.5
+    });
+  });
+}
+
+function fitControlText() {
+  [fiftyButtonEl, modeButtonEl, scoreContextEl].forEach((element) => {
+    fitTextToBox(element, { minSize: 9, step: 0.5 });
+  });
+}
+
+function fitTextToBox(element, options = {}) {
+  const minSize = options.minSize || 10;
+  const step = options.step || 1;
+  element.style.fontSize = "";
+  let fontSize = parseFloat(window.getComputedStyle(element).fontSize);
+
+  while (fontSize > minSize && doesTextOverflow(element)) {
+    fontSize -= step;
+    element.style.fontSize = `${fontSize}px`;
+  }
+}
+
+function doesTextOverflow(element) {
+  return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1;
 }
 
 function countryCodeToFlag(code) {

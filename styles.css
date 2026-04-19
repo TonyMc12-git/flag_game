@@ -88,6 +88,9 @@ h1 {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 800;
+  line-height: 1;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .mode-button {
@@ -101,13 +104,12 @@ h1 {
   color: var(--ink);
   font-size: 0.72rem;
   font-weight: 900;
+  line-height: 1;
   cursor: pointer;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
-}
-
-.spicy-button {
-  background: #ffe7c2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .fifty-button {
@@ -118,10 +120,13 @@ h1 {
   background: var(--panel-strong);
   color: var(--ink);
   font-weight: 900;
+  line-height: 0.96;
   cursor: pointer;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 8px 18px rgba(8, 30, 18, 0.08);
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .fifty-button:disabled {
@@ -151,30 +156,30 @@ h1 {
 .flag-stage {
   position: relative;
   display: grid;
+  grid-template-rows: 1.15rem auto;
   place-items: center;
   width: 100%;
   overflow: hidden;
 }
 
 .spicy-instruction {
-  display: none;
+  display: block;
+  visibility: hidden;
   margin: 0;
-  width: min(280px, 78vw);
+  width: min(520px, 92vw);
+  min-height: 1.15rem;
   color: var(--ink);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1;
   text-align: center;
   pointer-events: none;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
-.spicy-mode .spicy-instruction {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  z-index: 2;
-  transform: translateX(-50%);
+.duplicate-mode .spicy-instruction {
+  visibility: visible;
 }
 
 .flag-card {
@@ -187,7 +192,10 @@ h1 {
   display: block;
   font-size: clamp(8rem, 32vw, 16rem);
   line-height: 0.9;
-  filter: drop-shadow(0 12px 18px rgba(8, 30, 18, 0.18));
+  filter: none;
+  text-shadow: 0 2px 0 rgba(8, 30, 18, 0.08);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .options-grid {
@@ -210,6 +218,9 @@ h1 {
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 8px 18px rgba(8, 30, 18, 0.1);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .option-button:active,
@@ -248,7 +259,7 @@ h1 {
 }
 
 .option-button.long-option {
-  font-size: 1rem;
+  font-size: 1.45rem;
 }
 
 .celebration {
@@ -384,7 +395,7 @@ h1 {
   }
 
   .score-card {
-    min-width: 158px;
+    min-width: 136px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 3px;
@@ -404,15 +415,16 @@ h1 {
   .score-context {
     align-self: center;
     margin-top: 0;
-    font-size: 1.04rem;
+    font-size: 0.96rem;
     line-height: 1;
   }
 
   .mode-button {
+    grid-column: 1 / -1;
     margin-top: 0;
     min-height: 25px;
     padding: 4px 5px;
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     line-height: 1;
   }
 
@@ -421,7 +433,7 @@ h1 {
     min-width: 76px;
     padding: 4px 5px;
     border-radius: 10px;
-    font-size: 1.44rem;
+    font-size: 0.82rem;
     line-height: 0.95;
   }
 
@@ -430,19 +442,19 @@ h1 {
   }
 
   .flag-card {
-    margin-top: 5px;
+    margin-top: 2px;
     width: min(470px, 98vw);
     max-width: 100%;
   }
 
   .flag-emoji {
-    font-size: clamp(7.6rem, 43vw, 11.8rem);
+    font-size: clamp(8.2rem, 47vw, 12.7rem);
   }
 
-  .spicy-mode .spicy-instruction {
-    width: min(250px, 72vw);
-    font-size: 0.93rem;
-    line-height: 0.9;
+  .spicy-instruction {
+    width: min(330px, 96vw);
+    font-size: 0.7rem;
+    line-height: 0.95;
   }
 
   .options-grid {
@@ -471,12 +483,8 @@ h1 {
   }
 
   .option-button.long-option {
-    font-size: clamp(0.58rem, 2.55vw, 0.72rem);
+    font-size: clamp(0.96rem, 4.3vw, 1.16rem);
     line-height: 0.74;
-  }
-
-  .spicy-mode .options-grid {
-    overflow: hidden;
   }
 }
 
@@ -486,19 +494,19 @@ h1 {
   }
 
   .option-button.long-option {
-    font-size: clamp(0.5rem, 2.25vw, 0.62rem);
+    font-size: clamp(0.82rem, 3.6vw, 0.98rem);
   }
 
   .score-card {
-    min-width: 146px;
+    min-width: 128px;
   }
 
   h1 {
     font-size: 1.24rem;
   }
 
-  .spicy-mode .spicy-instruction {
-    width: min(220px, 68vw);
-    font-size: 0.78rem;
+  .spicy-instruction {
+    width: min(300px, 96vw);
+    font-size: 0.62rem;
   }
 }
