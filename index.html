@@ -12,19 +12,26 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  <link rel="stylesheet" href="styles.css?v=20260419-combined1">
+  <link rel="stylesheet" href="styles.css?v=20260419-score1">
 </head>
 <body>
   <main class="app-shell">
     <section class="game-panel" aria-live="polite">
       <header class="top-bar">
-        <h1>Flag Game</h1>
+        <div class="title-block">
+          <h1>Flag Game</h1>
+          <div class="player-stats" aria-label="Points and timer">
+            <span>Pts <strong id="points-score">0</strong></span>
+            <span>Time <strong id="round-timer">0.0s</strong></span>
+            <span>Best <strong id="high-score">0</strong></span>
+          </div>
+        </div>
         <div class="top-actions">
           <button class="fifty-button" id="fifty-button" type="button">Use your 50/50?</button>
           <div class="score-card">
             <span class="score-label">Score</span>
             <strong id="score">0 / 0</strong>
-            <span class="score-context" id="score-context">of 238 countries/territories</span>
+            <span class="score-context" id="score-context">of 238 countries / territories</span>
             <button class="mode-button" id="mode-button" type="button">UN countries only?</button>
           </div>
         </div>
@@ -50,6 +57,8 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260419-combined1"></script>
+  <div class="bonus-toast" id="bonus-toast" aria-live="assertive" aria-hidden="true"></div>
+
+  <script src="app.js?v=20260419-score1"></script>
 </body>
 </html>

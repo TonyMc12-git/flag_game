@@ -304,13 +304,14 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-combined1";
+const APP_VERSION = "20260419-score1";
+const HIGH_SCORE_KEY = "flagGameHighScore";
 
 const gameModes = {
   combined: {
     type: "single",
     countries: combinedCountries,
-    scoreContext: `of ${combinedCountries.length} countries/territories`,
+    scoreContext: `of ${combinedCountries.length} countries / territories`,
     switchLabel: "UN countries only?"
   },
   un: {
@@ -325,8 +326,12 @@ const flagEmojiEl = document.getElementById("flag-emoji");
 const optionsGridEl = document.getElementById("options-grid");
 const scoreEl = document.getElementById("score");
 const scoreContextEl = document.getElementById("score-context");
+const pointsScoreEl = document.getElementById("points-score");
+const roundTimerEl = document.getElementById("round-timer");
+const highScoreEl = document.getElementById("high-score");
 const fiftyButtonEl = document.getElementById("fifty-button");
 const modeButtonEl = document.getElementById("mode-button");
+const bonusToastEl = document.getElementById("bonus-toast");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
 const celebrationTitleEl = document.getElementById("celebration-title");
@@ -342,6 +347,14 @@ const state = {
   selectedCodes: new Set(),
   feedbackTimer: null,
   feedbackReadyAt: 0,
+  bonusTimer: null,
+  timerId: null,
+  roundStartedAt: 0,
+  elapsedMs: 0,
+  points: 0,
+  highScore: readHighScore(),
+  correctStreak: 0,
+  streakDurations: [],
   isLocked: false,
   isFiftyUsed: false,
   isComplete: false,
@@ -350,6 +363,7 @@ const state = {
 };
 
 registerServiceWorker();
+renderPoints();
 resetGame("combined");
 fiftyButtonEl.addEventListener("click", useFiftyFifty);
 modeButtonEl.addEventListener("click", () => {
@@ -375,12 +389,17 @@ window.addEventListener("resize", () => {
 });
 
 function resetGame(mode) {
+  stopRoundTimer();
   state.mode = mode;
   state.deck = shuffleList(gameModes[state.mode].countries);
   state.correct = 0;
   state.presented = 0;
+  state.points = 0;
+  state.correctStreak = 0;
+  state.streakDurations = [];
   state.isComplete = false;
   state.selectedCodes = new Set();
+  renderPoints();
   startRound();
 }
 
@@ -388,6 +407,7 @@ function startRound() {
   const modeConfig = gameModes[state.mode];
   if (state.deck.length === 0) {
     state.isLocked = true;
+    stopRoundTimer();
     optionsGridEl.innerHTML = "";
     fiftyButtonEl.disabled = true;
     document.body.classList.remove("duplicate-mode");
@@ -422,6 +442,7 @@ function startRound() {
   flagEmojiEl.textContent = countryCodeToFlag(state.currentCountry.code);
   renderOptions(state.currentOptions);
   renderScore();
+  startRoundTimer();
 }
 
 function buildOptions(correctCountry) {
@@ -508,6 +529,7 @@ function chooseCountry(country, button) {
     return;
   }
 
+  const roundMs = stopRoundTimer();
   state.isLocked = true;
   fiftyButtonEl.disabled = true;
   const isCorrect = country.code === state.currentCountry.code;
@@ -515,6 +537,7 @@ function chooseCountry(country, button) {
   if (isCorrect) {
     state.correct += 1;
   }
+  applyScoring(isCorrect, state.isFiftyUsed ? 5 : 10, roundMs);
 
   [...optionsGridEl.querySelectorAll(".option-button")].forEach((optionButton) => {
     optionButton.disabled = true;
@@ -560,6 +583,7 @@ function checkDuplicateSelection() {
     return;
   }
 
+  const roundMs = stopRoundTimer();
   state.isLocked = true;
   fiftyButtonEl.disabled = true;
   const correctCodes = new Set(state.currentDuplicateGroup.correct.map((country) => country.code));
@@ -570,6 +594,7 @@ function checkDuplicateSelection() {
   if (isCorrect) {
     state.correct += 1;
   }
+  applyScoring(isCorrect, state.currentDuplicateGroup.correct.length * 10, roundMs);
 
   [...optionsGridEl.querySelectorAll(".option-button")].forEach((optionButton) => {
     optionButton.disabled = true;
@@ -646,6 +671,108 @@ function hideCelebration() {
 
 function renderScore() {
   scoreEl.textContent = `${state.correct} / ${state.presented}`;
+}
+
+function startRoundTimer() {
+  stopRoundTimer();
+  state.elapsedMs = 0;
+  state.roundStartedAt = performance.now();
+  renderTimer(0);
+  state.timerId = window.setInterval(() => {
+    state.elapsedMs = performance.now() - state.roundStartedAt;
+    renderTimer(state.elapsedMs);
+  }, 100);
+}
+
+function stopRoundTimer() {
+  if (state.timerId) {
+    window.clearInterval(state.timerId);
+    state.timerId = null;
+  }
+
+  if (!state.roundStartedAt) {
+    return state.elapsedMs || 0;
+  }
+
+  state.elapsedMs = performance.now() - state.roundStartedAt;
+  state.roundStartedAt = 0;
+  renderTimer(state.elapsedMs);
+  return state.elapsedMs;
+}
+
+function renderTimer(milliseconds) {
+  roundTimerEl.textContent = `${(milliseconds / 1000).toFixed(1)}s`;
+}
+
+function applyScoring(isCorrect, basePoints, roundMs) {
+  const bonusMessages = [];
+
+  if (isCorrect) {
+    state.points += basePoints;
+    state.correctStreak += 1;
+    state.streakDurations.push(roundMs);
+
+    if (state.correctStreak % 10 === 0) {
+      state.points += 100;
+      bonusMessages.push("+100 streak bonus");
+
+      const lastTenSeconds = state.streakDurations
+        .slice(-10)
+        .reduce((total, duration) => total + duration, 0) / 1000;
+      if (lastTenSeconds <= 10) {
+        state.points += 100;
+        bonusMessages.push("+100 10-in-10 bonus");
+      }
+    }
+  } else {
+    state.correctStreak = 0;
+    state.streakDurations = [];
+  }
+
+  updateHighScore();
+  renderPoints();
+
+  if (bonusMessages.length > 0) {
+    showBonusToast(bonusMessages.join(" / "));
+  }
+}
+
+function renderPoints() {
+  pointsScoreEl.textContent = state.points;
+  highScoreEl.textContent = state.highScore;
+}
+
+function updateHighScore() {
+  if (state.points <= state.highScore) {
+    return;
+  }
+
+  state.highScore = state.points;
+  try {
+    localStorage.setItem(HIGH_SCORE_KEY, String(state.highScore));
+  } catch {
+    // Some private browsing modes can block localStorage writes.
+  }
+}
+
+function readHighScore() {
+  try {
+    const storedScore = Number(localStorage.getItem(HIGH_SCORE_KEY));
+    return Number.isFinite(storedScore) && storedScore > 0 ? storedScore : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function showBonusToast(message) {
+  window.clearTimeout(state.bonusTimer);
+  bonusToastEl.textContent = message;
+  bonusToastEl.classList.add("show");
+  bonusToastEl.setAttribute("aria-hidden", "false");
+  state.bonusTimer = window.setTimeout(() => {
+    bonusToastEl.classList.remove("show");
+    bonusToastEl.setAttribute("aria-hidden", "true");
+  }, 1400);
 }
 
 function fitOptionText() {

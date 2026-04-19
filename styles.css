@@ -73,6 +73,26 @@ h1 {
   letter-spacing: 0;
 }
 
+.title-block {
+  min-width: 0;
+}
+
+.player-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.player-stats strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
 .score-card {
   min-width: 102px;
   padding: 10px 13px;
@@ -186,14 +206,17 @@ h1 {
   width: min(520px, 88vw);
   display: grid;
   place-items: center;
+  overflow: visible;
 }
 
 .flag-emoji {
   display: block;
-  font-size: clamp(8rem, 32vw, 16rem);
-  line-height: 0.9;
-  filter: none;
-  text-shadow: 0 2px 0 rgba(8, 30, 18, 0.08);
+  padding: 0.04em 0;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: clamp(7.2rem, 28.8vw, 14.4rem);
+  line-height: 1.04;
+  filter: contrast(1.08) saturate(1.08);
+  text-shadow: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
@@ -344,6 +367,32 @@ h1 {
   cursor: default;
 }
 
+.bonus-toast {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 30;
+  max-width: min(340px, calc(100vw - 24px));
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #f2c14e;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(3, 19, 12, 0.24);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -14px) scale(0.96);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.bonus-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
 @media (max-width: 700px) {
   body {
     min-height: 100dvh;
@@ -391,7 +440,17 @@ h1 {
   }
 
   h1 {
-    font-size: 1.45rem;
+    font-size: 1.2rem;
+  }
+
+  .player-stats {
+    gap: 2px 5px;
+    margin-top: 3px;
+    font-size: 0.58rem;
+  }
+
+  .player-stats strong {
+    font-size: 0.68rem;
   }
 
   .score-card {
@@ -448,7 +507,7 @@ h1 {
   }
 
   .flag-emoji {
-    font-size: clamp(8.2rem, 47vw, 12.7rem);
+    font-size: clamp(7.4rem, 42.3vw, 11.4rem);
   }
 
   .spicy-instruction {
@@ -502,7 +561,15 @@ h1 {
   }
 
   h1 {
-    font-size: 1.24rem;
+    font-size: 1.08rem;
+  }
+
+  .player-stats {
+    font-size: 0.52rem;
+  }
+
+  .player-stats strong {
+    font-size: 0.62rem;
   }
 
   .spicy-instruction {
