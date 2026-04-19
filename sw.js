@@ -1,11 +1,11 @@
-const CACHE_NAME = "flag-game-pwa-v26";
-const APP_VERSION = "20260419-autoupdate2";
+const CACHE_NAME = "flag-game-pwa-v27";
+const APP_VERSION = "20260419-autoupdate3";
 
 const APP_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=20260419-autoupdate2",
-  "./app.js?v=20260419-autoupdate2",
+  "./styles.css?v=20260419-autoupdate3",
+  "./app.js?v=20260419-autoupdate3",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg"
@@ -63,7 +63,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (requestUrl.pathname.endsWith("/version.js")) {
+  if (requestUrl.pathname.endsWith("/sw.js")) {
     event.respondWith(fetch(new Request(event.request, { cache: "reload" })));
     return;
   }

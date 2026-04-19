@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-autoupdate2";
+const APP_VERSION = "20260419-autoupdate3";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -945,10 +945,10 @@ function registerServiceWorker() {
     }
 
     lastVersionCheck = now;
-    fetch(`./version.js?check=${now}`, { cache: "no-store" })
+    fetch(`./sw.js?check=${now}`, { cache: "no-store" })
       .then((response) => response.ok ? response.text() : "")
       .then((versionText) => {
-        const versionMatch = versionText.match(/FLAG_GAME_VERSION\s*=\s*"([^"]+)"/);
+        const versionMatch = versionText.match(/APP_VERSION\s*=\s*"([^"]+)"/);
         const latestVersion = versionMatch ? versionMatch[1] : "";
         if (!latestVersion || latestVersion === APP_VERSION) {
           return;
