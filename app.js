@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-svg1";
+const APP_VERSION = "20260419-svg2";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -710,7 +710,6 @@ function handleEndGame() {
   updateHighScore();
   renderPoints();
   fiftyButtonEl.disabled = true;
-  modeButtonEl.disabled = true;
   endGameButtonEl.textContent = "New Game";
   endGameButtonEl.classList.add("new-game");
   [...optionsGridEl.querySelectorAll(".option-button")].forEach((button) => {
