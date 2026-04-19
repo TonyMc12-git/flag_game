@@ -217,8 +217,8 @@ h1 {
   grid-template-rows: 1.15rem minmax(0, 1fr);
   place-items: center;
   width: 100%;
-  height: 190px;
-  max-height: 190px;
+  height: 210px;
+  max-height: 210px;
   overflow: hidden;
 }
 
@@ -247,31 +247,26 @@ h1 {
   height: 100%;
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .flag-emoji {
   display: grid;
   place-items: center;
-  width: min(330px, 72vw);
-  height: 100%;
+  width: min(360px, 76vw);
+  height: min(170px, 100%);
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   font-size: clamp(7.2rem, 28.8vw, 13.4rem);
   line-height: 1.04;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
   filter: contrast(1.22) saturate(1.18);
   text-shadow: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
   transform: translateZ(0);
   backface-visibility: hidden;
-}
-
-.flag-image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  image-rendering: auto;
 }
 
 .options-grid {
@@ -580,21 +575,21 @@ h1 {
   }
 
   .flag-stage {
-    height: 92px;
-    max-height: 92px;
+    height: 126px;
+    max-height: 126px;
     grid-template-rows: 1rem minmax(0, 1fr);
   }
 
   .flag-card {
     margin-top: 2px;
-    width: min(250px, 74vw);
-    height: 76px;
+    width: min(300px, 86vw);
+    height: 108px;
     max-width: 100%;
   }
 
   .flag-emoji {
-    width: min(220px, 68vw);
-    height: 100%;
+    width: min(280px, 82vw);
+    height: 96px;
     font-size: clamp(6.8rem, 39vw, 10.8rem);
   }
 
@@ -678,17 +673,18 @@ h1 {
   }
 
   .flag-stage {
-    height: 86px;
-    max-height: 86px;
+    height: 114px;
+    max-height: 114px;
   }
 
   .flag-card {
-    width: min(220px, 70vw);
-    height: 70px;
+    width: min(260px, 82vw);
+    height: 96px;
   }
 
   .flag-emoji {
-    width: min(200px, 66vw);
+    width: min(240px, 78vw);
+    height: 86px;
   }
 
   .spicy-instruction {

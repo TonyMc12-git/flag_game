@@ -304,7 +304,7 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-flagfit1";
+const APP_VERSION = "20260419-flagfit2";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const TEMPORARY_FIRST_CODES = ["NP", "QA", "BH", "LV"];
 
@@ -860,20 +860,19 @@ function doesTextOverflow(element) {
 
 function renderFlagImage(country) {
   const code = country.code.toLowerCase();
+  flagEmojiEl.textContent = "";
   flagEmojiEl.innerHTML = "";
+  flagEmojiEl.style.backgroundImage = `url("https://flagcdn.com/${code}.svg")`;
+  flagEmojiEl.setAttribute("role", "img");
+  flagEmojiEl.setAttribute("aria-label", `${country.name} flag`);
 
-  const image = document.createElement("img");
-  image.className = "flag-image";
-  image.src = `https://flagcdn.com/${code}.svg`;
-  image.alt = `${country.name} flag`;
-  image.decoding = "async";
-  image.loading = "eager";
-  image.addEventListener("error", () => {
+  const probe = new Image();
+  probe.addEventListener("error", () => {
+    flagEmojiEl.style.backgroundImage = "";
     flagEmojiEl.innerHTML = "";
     flagEmojiEl.textContent = countryCodeToFlag(country.code);
   }, { once: true });
-
-  flagEmojiEl.appendChild(image);
+  probe.src = `https://flagcdn.com/${code}.svg`;
 }
 
 function countryCodeToFlag(code) {
