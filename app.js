@@ -372,7 +372,7 @@ Object.entries(regionCodeGroups).forEach(([region, codes]) => {
   });
 });
 
-const APP_VERSION = "20260503-flagstrikes7";
+const APP_VERSION = "20260503-flagstrikes8";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const flagLoadStates = new Map();
 const DEFAULT_DIFFICULTY_LABEL = "This is too hard \u{1F62D}";
