@@ -387,6 +387,9 @@ h1 {
   width: min(125px, 31.2vw);
   height: min(78px, 100%);
   font-size: clamp(2.8rem, 11.2vw, 4.48rem);
+  line-height: 0.86;
+  transform: scale(0.8);
+  transform-origin: center center;
 }
 
 .flag-emoji {
@@ -779,6 +782,7 @@ h1 {
     width: min(83px, 25.6vw);
     height: 43px;
     font-size: clamp(2.16rem, 10.8vw, 3.2rem);
+    line-height: 0.82;
   }
 
   .flag-emoji {
