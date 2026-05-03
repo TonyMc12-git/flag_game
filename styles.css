@@ -384,9 +384,9 @@ h1 {
 
 .flag-card.game-over .flag-emoji,
 .flag-card.complete .flag-emoji {
-  width: min(170px, 42vw);
-  height: min(110px, 100%);
-  font-size: clamp(3.9rem, 15.5vw, 6.2rem);
+  width: min(156px, 39vw);
+  height: min(98px, 100%);
+  font-size: clamp(3.5rem, 14vw, 5.6rem);
 }
 
 .flag-emoji {
@@ -776,9 +776,9 @@ h1 {
 
   .flag-card.game-over .flag-emoji,
   .flag-card.complete .flag-emoji {
-    width: min(112px, 34vw);
-    height: 60px;
-    font-size: clamp(3rem, 15vw, 4.4rem);
+    width: min(104px, 32vw);
+    height: 54px;
+    font-size: clamp(2.7rem, 13.5vw, 4rem);
   }
 
   .flag-emoji {
