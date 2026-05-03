@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/icon.svg">
   <link rel="preconnect" href="https://flagcdn.com">
   <link rel="dns-prefetch" href="https://flagcdn.com">
-  <link rel="stylesheet" href="styles.css?v=20260503-flagmenu1">
+  <link rel="stylesheet" href="styles.css?v=20260503-flagmenu2">
 </head>
 <body>
   <main class="app-shell">
@@ -30,12 +30,12 @@
           </div>
         </div>
         <div class="top-actions">
-          <button class="fifty-button" id="fifty-button" type="button">Use your 50/50?</button>
+          <button class="fifty-button hidden-placeholder" id="fifty-button" type="button" aria-hidden="true" tabindex="-1"></button>
           <div class="score-card">
             <span class="score-label">Score</span>
             <strong id="score">0 / 0</strong>
             <span class="score-context" id="score-context">of 238 countries / territories</span>
-            <button class="mode-button" id="mode-button" type="button">This is too hard 😭</button>
+            <button class="mode-button" id="mode-button" type="button">This is too hard &#128557;</button>
           </div>
         </div>
       </header>
@@ -64,21 +64,22 @@
 
   <div class="difficulty-menu" id="difficulty-menu" aria-hidden="true">
     <div class="difficulty-menu-card" role="dialog" aria-modal="true" aria-labelledby="difficulty-menu-title">
-      <strong class="difficulty-menu-title" id="difficulty-menu-title">This is too hard 😭</strong>
+      <strong class="difficulty-menu-title" id="difficulty-menu-title">Make better choices...</strong>
       <div class="difficulty-menu-options" id="difficulty-menu-options">
-        <button class="difficulty-option" data-preset="five" type="button">5 options only</button>
-        <button class="difficulty-option" data-preset="un" type="button">UN countries only (193)</button>
-        <button class="difficulty-option" data-preset="africa" type="button">Africa UN only</button>
-        <button class="difficulty-option" data-preset="europe" type="button">Europe UN only</button>
-        <button class="difficulty-option" data-preset="asia" type="button">Asia UN only</button>
-        <button class="difficulty-option" data-preset="americas" type="button">Americas UN only</button>
-        <button class="difficulty-option" data-preset="australasia" type="button">Australiasia UN only</button>
-        <button class="difficulty-option" data-preset="nonun" type="button">Non-UN only</button>
+        <button class="difficulty-option difficulty-toggle" id="difficulty-toggle" type="button">5 options only</button>
+        <button class="difficulty-option" data-country-set="combined" type="button">All Countries/territories (238)</button>
+        <button class="difficulty-option" data-country-set="un" type="button">UN countries only (193)</button>
+        <button class="difficulty-option" data-country-set="africa" type="button">Africa UN only</button>
+        <button class="difficulty-option" data-country-set="europe" type="button">Europe UN only</button>
+        <button class="difficulty-option" data-country-set="asia" type="button">Asia UN only</button>
+        <button class="difficulty-option" data-country-set="americas" type="button">Americas UN only</button>
+        <button class="difficulty-option" data-country-set="australasia" type="button">Australiasia UN only</button>
+        <button class="difficulty-option" data-country-set="nonun" type="button">Non-UN only</button>
       </div>
       <button class="difficulty-menu-close" id="difficulty-menu-close" type="button">Back</button>
     </div>
   </div>
 
-  <script src="app.js?v=20260503-flagmenu1"></script>
+  <script src="app.js?v=20260503-flagmenu2"></script>
 </body>
 </html>
