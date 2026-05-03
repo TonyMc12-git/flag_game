@@ -372,7 +372,7 @@ Object.entries(regionCodeGroups).forEach(([region, codes]) => {
   });
 });
 
-const APP_VERSION = "20260503-flagmenu2";
+const APP_VERSION = "20260503-flagstrikes1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const flagLoadStates = new Map();
 const DEFAULT_DIFFICULTY_LABEL = "This is too hard \u{1F62D}";
@@ -433,6 +433,7 @@ countrySetConfigs.australasia.scoreContext = `of ${countrySetConfigs.australasia
 countrySetConfigs.australasia.menuLabel = `Australiasia UN only (${countrySetConfigs.australasia.countries.length})`;
 
 const flagEmojiEl = document.getElementById("flag-emoji");
+const strikeEls = [...document.querySelectorAll("#strike-track .strike-pill")];
 const optionsGridEl = document.getElementById("options-grid");
 const scoreEl = document.getElementById("score");
 const scoreContextEl = document.getElementById("score-context");
@@ -470,8 +471,9 @@ const state = {
   resetTimerOnNextRound: false,
   points: 0,
   highScore: 0,
+  startingHighScore: 0,
+  strikes: 0,
   correctStreak: 0,
-  isEnded: false,
   isLocked: false,
   isDifficultyMenuOpen: false,
   isComplete: false,
@@ -484,7 +486,7 @@ configureDifficultyMenu();
 renderPoints();
 resetGame("combined", 20);
 modeButtonEl.addEventListener("click", openDifficultyMenu);
-endGameButtonEl.addEventListener("click", handleEndGame);
+endGameButtonEl.addEventListener("click", () => resetGame(state.countrySetKey, state.optionCount));
 difficultyMenuCloseEl.addEventListener("click", closeDifficultyMenu);
 difficultyMenuEl.addEventListener("pointerdown", (event) => {
   if (event.target === difficultyMenuEl) {
@@ -525,13 +527,14 @@ function resetGame(countrySetKey, optionCount = state.optionCount, keepMenuOpen 
   state.presented = 0;
   state.points = 0;
   state.highScore = readHighScore();
+  state.startingHighScore = state.highScore;
+  state.strikes = 0;
   state.correctStreak = 0;
   state.streakElapsedMs = 0;
   state.resetTimerOnNextRound = false;
   state.isComplete = false;
-  state.isEnded = false;
   state.selectedCodes = new Set();
-  endGameButtonEl.textContent = "That'll do";
+  endGameButtonEl.textContent = "New game";
   endGameButtonEl.classList.remove("new-game");
   modeButtonEl.disabled = false;
   fiftyButtonEl.disabled = true;
@@ -539,6 +542,7 @@ function resetGame(countrySetKey, optionCount = state.optionCount, keepMenuOpen 
   updateDifficultyToggleButton();
   updateModeButtonLabel();
   renderPoints();
+  renderStrikes();
   renderTimer(0);
   preloadUpcomingFlags(24);
   startRound();
@@ -583,7 +587,7 @@ function updateModeButtonLabel() {
 }
 
 function openDifficultyMenu() {
-  if (state.isEnded) {
+  if (state.isComplete) {
     return;
   }
 
@@ -609,22 +613,13 @@ function fitDifficultyMenuText() {
 }
 
 function startRound() {
-  if (state.isEnded) {
+  if (state.isComplete) {
     return;
   }
 
   const countrySet = getCurrentCountrySet();
   if (state.deck.length === 0) {
-    state.isLocked = true;
-    stopRoundTimer();
-    optionsGridEl.innerHTML = "";
-    fiftyButtonEl.disabled = true;
-    document.body.classList.remove("duplicate-mode");
-    flagEmojiEl.innerHTML = "";
-    flagEmojiEl.textContent = "Done";
-    state.isComplete = true;
-    renderScore();
-    showCompletion();
+    finishGame("complete");
     return;
   }
 
@@ -783,9 +778,15 @@ function chooseCountry(country, button) {
 
   if (!isCorrect) {
     button.classList.add("incorrect");
+    state.strikes += 1;
+    renderStrikes();
   }
 
   renderScore();
+  if (!isCorrect && state.strikes >= 5) {
+    finishGame("strikes");
+    return;
+  }
   showCelebration(isCorrect, country.name);
 }
 
@@ -858,14 +859,6 @@ function buildDuplicateAnswerCopy(missedCodes, extraCodes) {
   return parts.join(" ");
 }
 
-function showCompletion() {
-  celebrationEl.classList.remove("wrong");
-  celebrationKickerEl.textContent = "Complete";
-  celebrationTitleEl.textContent = "Full Set Done";
-  celebrationCopyEl.textContent = `You finished ${getCurrentCountrySet().scoreContext}. Restart the app to play this set again.`;
-  showFeedback();
-}
-
 function showFeedback() {
   window.clearTimeout(state.feedbackTimer);
   state.feedbackReadyAt = Date.now() + 400;
@@ -888,23 +881,50 @@ function renderScore() {
   scoreEl.textContent = `${state.correct} / ${state.presented}`;
 }
 
-function handleEndGame() {
-  if (state.isEnded) {
-    resetGame(state.countrySetKey, state.optionCount);
-    return;
-  }
+function renderStrikes() {
+  strikeEls.forEach((strikeEl, index) => {
+    strikeEl.classList.toggle("used", index < state.strikes);
+  });
+}
 
-  state.isEnded = true;
+function finishGame(reason = "complete") {
   state.isLocked = true;
+  state.isComplete = true;
   stopRoundTimer();
   updateHighScore();
   renderPoints();
   fiftyButtonEl.disabled = true;
-  endGameButtonEl.textContent = "New Game";
-  endGameButtonEl.classList.add("new-game");
-  [...optionsGridEl.querySelectorAll(".option-button")].forEach((button) => {
-    button.disabled = true;
-  });
+  modeButtonEl.disabled = true;
+  document.body.classList.remove("duplicate-mode");
+  optionsGridEl.innerHTML = "";
+
+  if (reason === "strikes") {
+    flagEmojiEl.style.backgroundImage = "";
+    flagEmojiEl.innerHTML = "";
+    flagEmojiEl.textContent = "\u{1F62D}";
+    flagEmojiEl.removeAttribute("aria-label");
+    flagEmojiEl.removeAttribute("role");
+    if (state.points > state.startingHighScore) {
+      celebrationEl.classList.remove("wrong");
+      celebrationKickerEl.textContent = "New Best";
+      celebrationTitleEl.textContent = `${state.points} points`;
+      celebrationCopyEl.textContent = "New high score before strike five.";
+      showFeedback();
+      return;
+    }
+    return;
+  }
+
+  flagEmojiEl.style.backgroundImage = "";
+  flagEmojiEl.innerHTML = "";
+  flagEmojiEl.textContent = "Done";
+  flagEmojiEl.removeAttribute("aria-label");
+  flagEmojiEl.removeAttribute("role");
+  celebrationEl.classList.remove("wrong");
+  celebrationKickerEl.textContent = "Complete";
+  celebrationTitleEl.textContent = "Full Set Done";
+  celebrationCopyEl.textContent = `You finished ${getCurrentCountrySet().scoreContext}.`;
+  showFeedback();
 }
 
 function startRoundTimer() {

@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/icon.svg">
   <link rel="preconnect" href="https://flagcdn.com">
   <link rel="dns-prefetch" href="https://flagcdn.com">
-  <link rel="stylesheet" href="styles.css?v=20260503-flagmenu3">
+  <link rel="stylesheet" href="styles.css?v=20260503-flagstrikes1">
 </head>
 <body>
   <main class="app-shell">
@@ -26,7 +26,7 @@
             <span><em>Pts</em> <strong id="points-score">0</strong></span>
             <span><em>Time</em> <strong id="round-timer">000.0s</strong></span>
             <span><em>Best</em> <strong id="high-score">0</strong></span>
-            <button class="end-game-button" id="end-game-button" type="button">That'll do</button>
+            <button class="end-game-button" id="end-game-button" type="button">New game</button>
           </div>
         </div>
         <div class="top-actions">
@@ -41,6 +41,13 @@
       </header>
 
       <div class="flag-stage">
+        <div class="strike-track" id="strike-track" aria-label="Strikes">
+          <span class="strike-pill">1</span>
+          <span class="strike-pill">2</span>
+          <span class="strike-pill">3</span>
+          <span class="strike-pill">4</span>
+          <span class="strike-pill">5</span>
+        </div>
         <p class="spicy-instruction">Choose all correct answers and click "Confirm"</p>
         <div class="flag-card" id="flag-card" aria-label="Country flag">
           <span class="flag-emoji" id="flag-emoji" aria-hidden="true"></span>
@@ -80,6 +87,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260503-flagmenu3"></script>
+  <script src="app.js?v=20260503-flagstrikes1"></script>
 </body>
 </html>
