@@ -364,7 +364,29 @@ h1 {
   height: 100%;
   display: grid;
   place-items: center;
+  grid-template-rows: auto minmax(0, 1fr);
   overflow: visible;
+}
+
+.flag-status {
+  display: none;
+  color: var(--ink);
+  font-family: Georgia, "Palatino Linotype", serif;
+  font-size: clamp(1.7rem, 5.6vw, 2.8rem);
+  line-height: 0.96;
+  text-align: center;
+}
+
+.flag-card.game-over .flag-status,
+.flag-card.complete .flag-status {
+  display: block;
+}
+
+.flag-card.game-over .flag-emoji,
+.flag-card.complete .flag-emoji {
+  width: min(170px, 42vw);
+  height: min(110px, 100%);
+  font-size: clamp(4.3rem, 17vw, 7rem);
 }
 
 .flag-emoji {
@@ -748,6 +770,17 @@ h1 {
     max-width: 100%;
   }
 
+  .flag-status {
+    font-size: clamp(1.3rem, 6vw, 2rem);
+  }
+
+  .flag-card.game-over .flag-emoji,
+  .flag-card.complete .flag-emoji {
+    width: min(120px, 36vw);
+    height: 66px;
+    font-size: clamp(3.4rem, 17vw, 5rem);
+  }
+
   .flag-emoji {
     width: min(280px, 82vw);
     height: 96px;
@@ -841,6 +874,10 @@ h1 {
   .flag-card {
     width: min(260px, 82vw);
     height: 96px;
+  }
+
+  .flag-status {
+    font-size: clamp(1.2rem, 5.8vw, 1.7rem);
   }
 
   .flag-emoji {

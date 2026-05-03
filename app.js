@@ -372,7 +372,7 @@ Object.entries(regionCodeGroups).forEach(([region, codes]) => {
   });
 });
 
-const APP_VERSION = "20260503-flagstrikes4";
+const APP_VERSION = "20260503-flagstrikes5";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const flagLoadStates = new Map();
 const DEFAULT_DIFFICULTY_LABEL = "This is too hard \u{1F62D}";
@@ -433,6 +433,8 @@ countrySetConfigs.australasia.scoreContext = `of ${countrySetConfigs.australasia
 countrySetConfigs.australasia.menuLabel = `Australiasia UN only (${countrySetConfigs.australasia.countries.length})`;
 
 const flagEmojiEl = document.getElementById("flag-emoji");
+const flagStatusEl = document.getElementById("flag-status");
+const flagCardEl = document.getElementById("flag-card");
 const strikeEls = [...document.querySelectorAll("#strike-track .strike-pill")];
 const optionsGridEl = document.getElementById("options-grid");
 const scoreEl = document.getElementById("score");
@@ -566,6 +568,7 @@ function resetGame(countrySetKey, optionCount = state.optionCount, keepMenuOpen 
   renderPoints();
   renderStrikes();
   renderTimer(0);
+  clearFlagEndState();
   preloadUpcomingFlags(24);
   startRound();
 }
@@ -660,6 +663,7 @@ function startRound() {
   scoreContextEl.textContent = countrySet.scoreContext;
   fitControlText();
 
+  clearFlagEndState();
   renderFlagImage(state.currentCountry);
   renderOptions(state.currentOptions);
   renderScore();
@@ -928,6 +932,9 @@ function finishGame(reason = "complete") {
   optionsGridEl.innerHTML = "";
 
   if (reason === "strikes") {
+    flagCardEl.classList.add("game-over");
+    flagStatusEl.textContent = "Game Over";
+    flagStatusEl.setAttribute("aria-hidden", "false");
     flagEmojiEl.style.backgroundImage = "";
     flagEmojiEl.innerHTML = "";
     flagEmojiEl.textContent = "\u{1F62D}";
@@ -936,6 +943,9 @@ function finishGame(reason = "complete") {
     return;
   }
 
+  flagCardEl.classList.add("complete");
+  flagStatusEl.textContent = "Finished";
+  flagStatusEl.setAttribute("aria-hidden", "false");
   flagEmojiEl.style.backgroundImage = "";
   flagEmojiEl.innerHTML = "";
   flagEmojiEl.textContent = "Done";
@@ -946,6 +956,12 @@ function finishGame(reason = "complete") {
   celebrationTitleEl.textContent = "Full Set Done";
   celebrationCopyEl.textContent = `You finished ${getCurrentCountrySet().scoreContext}.`;
   showFeedback();
+}
+
+function clearFlagEndState() {
+  flagCardEl.classList.remove("game-over", "complete");
+  flagStatusEl.textContent = "";
+  flagStatusEl.setAttribute("aria-hidden", "true");
 }
 
 function startRoundTimer() {
