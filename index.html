@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/icon.svg">
   <link rel="preconnect" href="https://flagcdn.com">
   <link rel="dns-prefetch" href="https://flagcdn.com">
-  <link rel="stylesheet" href="styles.css?v=20260419-random1">
+  <link rel="stylesheet" href="styles.css?v=20260503-flagmenu1">
 </head>
 <body>
   <main class="app-shell">
@@ -35,7 +35,7 @@
             <span class="score-label">Score</span>
             <strong id="score">0 / 0</strong>
             <span class="score-context" id="score-context">of 238 countries / territories</span>
-            <button class="mode-button" id="mode-button" type="button">UN countries only?</button>
+            <button class="mode-button" id="mode-button" type="button">This is too hard 😭</button>
           </div>
         </div>
       </header>
@@ -62,6 +62,23 @@
 
   <div class="bonus-toast" id="bonus-toast" aria-live="assertive" aria-hidden="true"></div>
 
-  <script src="app.js?v=20260419-random1"></script>
+  <div class="difficulty-menu" id="difficulty-menu" aria-hidden="true">
+    <div class="difficulty-menu-card" role="dialog" aria-modal="true" aria-labelledby="difficulty-menu-title">
+      <strong class="difficulty-menu-title" id="difficulty-menu-title">This is too hard 😭</strong>
+      <div class="difficulty-menu-options" id="difficulty-menu-options">
+        <button class="difficulty-option" data-preset="five" type="button">5 options only</button>
+        <button class="difficulty-option" data-preset="un" type="button">UN countries only (193)</button>
+        <button class="difficulty-option" data-preset="africa" type="button">Africa UN only</button>
+        <button class="difficulty-option" data-preset="europe" type="button">Europe UN only</button>
+        <button class="difficulty-option" data-preset="asia" type="button">Asia UN only</button>
+        <button class="difficulty-option" data-preset="americas" type="button">Americas UN only</button>
+        <button class="difficulty-option" data-preset="australasia" type="button">Australiasia UN only</button>
+        <button class="difficulty-option" data-preset="nonun" type="button">Non-UN only</button>
+      </div>
+      <button class="difficulty-menu-close" id="difficulty-menu-close" type="button">Back</button>
+    </div>
+  </div>
+
+  <script src="app.js?v=20260503-flagmenu1"></script>
 </body>
 </html>

@@ -304,24 +304,145 @@ const duplicateGroupsByFlagCode = new Map(
   duplicateFlagGroups.map((group) => [group.flagCode, group])
 );
 
-const APP_VERSION = "20260419-random1";
+const regionCodeGroups = {
+  africa: [
+    "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ",
+    "DZ", "EG", "EH", "ER", "ET", "GA", "GH", "GM", "GN", "GW", "GQ", "KE", "LR", "LS",
+    "LY", "MA", "MG", "ML", "MR", "MU", "MW", "MZ", "NA", "NE", "NG", "RE", "RW", "SC",
+    "SD", "SH", "SL", "SN", "SO", "SS", "ST", "SZ", "TG", "TN", "TZ", "UG", "YT", "ZA",
+    "ZM", "ZW"
+  ],
+  europe: [
+    "AD", "AL", "AT", "AX", "BA", "BE", "BG", "BY", "CH", "CZ", "DE", "DK", "EE", "ES",
+    "FI", "FO", "FR", "GB", "GG", "GI", "GR", "HR", "HU", "IE", "IM", "IS", "IT", "JE",
+    "LI", "LT", "LU", "LV", "MC", "MD", "ME", "MK", "MT", "NL", "NO", "PL", "PT", "RO",
+    "RS", "RU", "SE", "SI", "SK", "SM", "UA", "VA", "XK"
+  ],
+  asia: [
+    "AE", "AF", "AM", "AZ", "BD", "BH", "BN", "BT", "CC", "CN", "CX", "CY", "GE", "HK",
+    "ID", "IL", "IN", "IO", "IQ", "IR", "JO", "JP", "KG", "KH", "KP", "KR", "KW", "KZ",
+    "LA", "LB", "LK", "MM", "MN", "MO", "MV", "MY", "NP", "OM", "PH", "PK", "PS", "QA",
+    "SA", "SG", "SY", "TH", "TJ", "TL", "TM", "TR", "TW", "UZ", "VN", "YE"
+  ],
+  americas: [
+    "AG", "AI", "AR", "AW", "BB", "BL", "BM", "BO", "BQ", "BR", "BS", "BZ", "CA", "CL",
+    "CO", "CR", "CU", "CW", "DM", "DO", "EC", "FK", "GD", "GL", "GT", "GY", "HN", "HT",
+    "JM", "KN", "KY", "LC", "MF", "MQ", "MS", "MX", "NI", "PA", "PE", "PM", "PR", "PY",
+    "SR", "SV", "SX", "TC", "TT", "US", "UY", "VC", "VE", "VG", "VI"
+  ],
+  australasia: [
+    "AS", "AU", "CK", "FJ", "FM", "GU", "KI", "MH", "MP", "NC", "NF", "NR", "NU", "NZ",
+    "PF", "PG", "PN", "PW", "SB", "TK", "TO", "TV", "VU", "WF", "WS"
+  ]
+};
+
+const unPresetCodes = {
+  africa: new Set([
+    "DZ", "AO", "BJ", "BW", "BF", "BI", "CV", "CM", "CF", "TD", "KM", "CG", "CD", "CI",
+    "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR",
+    "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN",
+    "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "ZM", "ZW"
+  ]),
+  europe: new Set([
+    "AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CZ", "DK", "EE", "FI", "FR", "DE",
+    "GR", "HU", "IS", "IE", "IT", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL",
+    "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI", "ES", "SE", "CH", "UA",
+    "GB"
+  ]),
+  asia: new Set([
+    "AF", "AM", "AZ", "BH", "BD", "BT", "BN", "KH", "CN", "CY", "GE", "IN", "ID", "IR",
+    "IQ", "IL", "JP", "JO", "KZ", "KW", "KG", "LA", "LB", "MY", "MV", "MN", "MM", "NP",
+    "KP", "OM", "PK", "PH", "QA", "SA", "SG", "KR", "LK", "SY", "TJ", "TH", "TL", "TR",
+    "TM", "AE", "UZ", "VN", "YE"
+  ]),
+  americas: new Set([
+    "AG", "AR", "BS", "BB", "BZ", "BO", "BR", "CA", "CL", "CO", "CR", "CU", "DM", "DO",
+    "EC", "SV", "GD", "GT", "GY", "HT", "HN", "JM", "MX", "NI", "PA", "PY", "PE", "KN",
+    "LC", "VC", "SR", "TT", "US", "UY", "VE"
+  ]),
+  australasia: new Set([
+    "AU", "FJ", "KI", "MH", "FM", "NR", "NZ", "PW", "PG", "WS", "SB", "TO", "TV", "VU"
+  ])
+};
+
+const regionByCode = new Map();
+Object.entries(regionCodeGroups).forEach(([region, codes]) => {
+  codes.forEach((code) => {
+    regionByCode.set(code, region);
+  });
+});
+
+const APP_VERSION = "20260503-flagmenu1";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const flagLoadStates = new Map();
 
-const gameModes = {
+const gamePresets = {
   combined: {
-    type: "single",
     countries: combinedCountries,
+    optionCount: 20,
     scoreContext: `of ${combinedCountries.length} countries / territories`,
-    switchLabel: "UN countries only?"
+    menuLabel: `All countries / territories (${combinedCountries.length})`
+  },
+  five: {
+    countries: combinedCountries,
+    optionCount: 5,
+    scoreContext: `of ${combinedCountries.length} countries / territories`,
+    menuLabel: "5 options only"
   },
   un: {
-    type: "single",
     countries,
-    scoreContext: "of 193 UN countries",
-    switchLabel: "All countries?"
+    optionCount: 20,
+    scoreContext: `of ${countries.length} UN countries`,
+    menuLabel: `UN countries only (${countries.length})`
+  },
+  africa: {
+    countries: countries.filter((country) => unPresetCodes.africa.has(country.code)),
+    optionCount: 20,
+    scoreContext: "",
+    menuLabel: ""
+  },
+  europe: {
+    countries: countries.filter((country) => unPresetCodes.europe.has(country.code)),
+    optionCount: 20,
+    scoreContext: "",
+    menuLabel: ""
+  },
+  asia: {
+    countries: countries.filter((country) => unPresetCodes.asia.has(country.code)),
+    optionCount: 20,
+    scoreContext: "",
+    menuLabel: ""
+  },
+  americas: {
+    countries: countries.filter((country) => unPresetCodes.americas.has(country.code)),
+    optionCount: 20,
+    scoreContext: "",
+    menuLabel: ""
+  },
+  australasia: {
+    countries: countries.filter((country) => unPresetCodes.australasia.has(country.code)),
+    optionCount: 20,
+    scoreContext: "",
+    menuLabel: ""
+  },
+  nonun: {
+    countries: nonUnCountries,
+    optionCount: 20,
+    scoreContext: `of ${nonUnCountries.length} non-UN countries / territories`,
+    menuLabel: `Non-UN only (${nonUnCountries.length})`
   }
 };
+
+gamePresets.africa.scoreContext = `of ${gamePresets.africa.countries.length} African UN countries`;
+gamePresets.africa.menuLabel = `Africa UN only (${gamePresets.africa.countries.length})`;
+gamePresets.europe.scoreContext = `of ${gamePresets.europe.countries.length} European UN countries`;
+gamePresets.europe.menuLabel = `Europe UN only (${gamePresets.europe.countries.length})`;
+gamePresets.asia.scoreContext = `of ${gamePresets.asia.countries.length} Asian UN countries`;
+gamePresets.asia.menuLabel = `Asia UN only (${gamePresets.asia.countries.length})`;
+gamePresets.americas.scoreContext = `of ${gamePresets.americas.countries.length} American UN countries`;
+gamePresets.americas.menuLabel = `Americas UN only (${gamePresets.americas.countries.length})`;
+gamePresets.australasia.scoreContext = `of ${gamePresets.australasia.countries.length} Australasian UN countries`;
+gamePresets.australasia.menuLabel = `Australiasia UN only (${gamePresets.australasia.countries.length})`;
 
 const flagEmojiEl = document.getElementById("flag-emoji");
 const optionsGridEl = document.getElementById("options-grid");
@@ -333,6 +454,9 @@ const highScoreEl = document.getElementById("high-score");
 const fiftyButtonEl = document.getElementById("fifty-button");
 const modeButtonEl = document.getElementById("mode-button");
 const endGameButtonEl = document.getElementById("end-game-button");
+const difficultyMenuEl = document.getElementById("difficulty-menu");
+const difficultyMenuOptionsEl = document.getElementById("difficulty-menu-options");
+const difficultyMenuCloseEl = document.getElementById("difficulty-menu-close");
 const bonusToastEl = document.getElementById("bonus-toast");
 const celebrationEl = document.getElementById("celebration");
 const celebrationKickerEl = document.getElementById("celebration-kicker");
@@ -341,7 +465,7 @@ const celebrationCopyEl = document.getElementById("celebration-copy");
 const celebrationButtonEl = document.getElementById("celebration-button");
 
 const state = {
-  mode: "combined",
+  preset: "combined",
   currentCountry: null,
   currentDuplicateGroup: null,
   currentOptions: [],
@@ -359,6 +483,7 @@ const state = {
   correctStreak: 0,
   isEnded: false,
   isLocked: false,
+  isDifficultyMenuOpen: false,
   isFiftyUsed: false,
   isComplete: false,
   correct: 0,
@@ -366,13 +491,18 @@ const state = {
 };
 
 registerServiceWorker();
+configureDifficultyMenu();
 renderPoints();
 resetGame("combined");
 fiftyButtonEl.addEventListener("click", useFiftyFifty);
-modeButtonEl.addEventListener("click", () => {
-  resetGame(state.mode === "combined" ? "un" : "combined");
-});
+modeButtonEl.addEventListener("click", openDifficultyMenu);
 endGameButtonEl.addEventListener("click", handleEndGame);
+difficultyMenuCloseEl.addEventListener("click", closeDifficultyMenu);
+difficultyMenuEl.addEventListener("pointerdown", (event) => {
+  if (event.target === difficultyMenuEl) {
+    closeDifficultyMenu();
+  }
+});
 celebrationButtonEl.addEventListener("click", () => {
   if (Date.now() < state.feedbackReadyAt) {
     return;
@@ -392,14 +522,15 @@ window.addEventListener("resize", () => {
   });
 });
 
-function resetGame(mode) {
+function resetGame(presetKey) {
   stopRoundTimer();
-  state.mode = mode;
-  state.deck = buildDeck(gameModes[state.mode].countries);
+  closeDifficultyMenu();
+  state.preset = presetKey;
+  state.deck = buildDeck(getCurrentCountries());
   state.correct = 0;
   state.presented = 0;
   state.points = 0;
-  state.highScore = readHighScore(state.mode);
+  state.highScore = readHighScore(state.preset);
   state.correctStreak = 0;
   state.streakElapsedMs = 0;
   state.resetTimerOnNextRound = false;
@@ -409,6 +540,7 @@ function resetGame(mode) {
   endGameButtonEl.textContent = "That'll do";
   endGameButtonEl.classList.remove("new-game");
   modeButtonEl.disabled = false;
+  updateDifficultyMenuButtons();
   renderPoints();
   renderTimer(0);
   preloadUpcomingFlags(24);
@@ -419,12 +551,50 @@ function buildDeck(sourceCountries) {
   return shuffleList(sourceCountries);
 }
 
+function configureDifficultyMenu() {
+  [...difficultyMenuOptionsEl.querySelectorAll(".difficulty-option")].forEach((button) => {
+    const presetKey = button.dataset.preset;
+    const preset = gamePresets[presetKey];
+    if (!preset) {
+      return;
+    }
+
+    button.textContent = preset.menuLabel;
+    button.addEventListener("click", () => {
+      resetGame(presetKey);
+    });
+  });
+}
+
+function updateDifficultyMenuButtons() {
+  [...difficultyMenuOptionsEl.querySelectorAll(".difficulty-option")].forEach((button) => {
+    button.classList.toggle("active", button.dataset.preset === state.preset);
+  });
+}
+
+function openDifficultyMenu() {
+  if (state.isEnded) {
+    return;
+  }
+
+  state.isDifficultyMenuOpen = true;
+  updateDifficultyMenuButtons();
+  difficultyMenuEl.classList.add("show");
+  difficultyMenuEl.setAttribute("aria-hidden", "false");
+}
+
+function closeDifficultyMenu() {
+  state.isDifficultyMenuOpen = false;
+  difficultyMenuEl.classList.remove("show");
+  difficultyMenuEl.setAttribute("aria-hidden", "true");
+}
+
 function startRound() {
   if (state.isEnded) {
     return;
   }
 
-  const modeConfig = gameModes[state.mode];
+  const preset = getCurrentPreset();
   if (state.deck.length === 0) {
     state.isLocked = true;
     stopRoundTimer();
@@ -441,9 +611,7 @@ function startRound() {
   }
 
   state.currentCountry = state.deck.pop();
-  state.currentDuplicateGroup = state.mode === "combined"
-    ? duplicateGroupsByFlagCode.get(state.currentCountry.code) || null
-    : null;
+  state.currentDuplicateGroup = getActiveDuplicateGroup(state.currentCountry);
   state.currentOptions = state.currentDuplicateGroup
     ? buildDuplicateOptions(state.currentDuplicateGroup)
     : buildOptions(state.currentCountry);
@@ -456,8 +624,8 @@ function startRound() {
   fiftyButtonEl.classList.toggle("confirm-button", isDuplicateRound);
   fiftyButtonEl.textContent = isDuplicateRound ? "Confirm" : "Use your 50/50?";
   fiftyButtonEl.disabled = false;
-  modeButtonEl.textContent = modeConfig.switchLabel;
-  scoreContextEl.textContent = modeConfig.scoreContext;
+  modeButtonEl.textContent = "This is too hard 😭";
+  scoreContextEl.textContent = preset.scoreContext;
   fitControlText();
 
   renderFlagImage(state.currentCountry);
@@ -470,24 +638,74 @@ function startRound() {
 function buildOptions(correctCountry) {
   const sourceCountries = getCurrentCountries();
   const blockedCodes = getLookalikeBlockedCodes(correctCountry.code);
-  const distractors = shuffleList(sourceCountries.filter((country) => {
-    return country.code !== correctCountry.code && !blockedCodes.has(country.code);
-  }))
-    .slice(0, 19);
+  const optionCount = getCurrentPreset().optionCount;
+  const distractorCount = optionCount - 1;
+  const distractors = optionCount === 5
+    ? buildNearbyDistractors(correctCountry, sourceCountries, blockedCodes, distractorCount)
+    : shuffleList(sourceCountries.filter((country) => {
+      return country.code !== correctCountry.code && !blockedCodes.has(country.code);
+    })).slice(0, distractorCount);
   return [correctCountry, ...distractors]
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
 function buildDuplicateOptions(flagGroup) {
   const correctCodes = new Set(flagGroup.correct.map((country) => country.code));
-  const distractors = shuffleList(combinedCountries.filter((country) => !correctCodes.has(country.code)))
-    .slice(0, 20 - flagGroup.correct.length);
+  const optionCount = getCurrentPreset().optionCount;
+  const sourceCountries = getCurrentCountries();
+  const distractors = shuffleList(sourceCountries.filter((country) => !correctCodes.has(country.code)))
+    .slice(0, Math.max(0, optionCount - flagGroup.correct.length));
   return [...flagGroup.correct, ...distractors]
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
+function buildNearbyDistractors(correctCountry, sourceCountries, blockedCodes, distractorCount) {
+  const basePool = sourceCountries.filter((country) => {
+    return country.code !== correctCountry.code && !blockedCodes.has(country.code);
+  });
+  const sameRegion = shuffleList(basePool.filter((country) => getRegionForCode(country.code) === getRegionForCode(correctCountry.code)));
+  const fallbackPool = shuffleList(basePool.filter((country) => getRegionForCode(country.code) !== getRegionForCode(correctCountry.code)));
+  const nearby = sameRegion.slice(0, distractorCount);
+
+  if (nearby.length < distractorCount) {
+    nearby.push(...fallbackPool.slice(0, distractorCount - nearby.length));
+  }
+
+  return nearby;
+}
+
+function getActiveDuplicateGroup(country) {
+  const group = duplicateGroupsByFlagCode.get(country.code);
+  if (!group) {
+    return null;
+  }
+
+  if (state.preset === "combined") {
+    return group;
+  }
+
+  const currentCodes = new Set(getCurrentCountries().map((entry) => entry.code));
+  const activeCorrect = group.correct.filter((entry) => currentCodes.has(entry.code));
+  if (activeCorrect.length < 2) {
+    return null;
+  }
+
+  return {
+    ...group,
+    correct: activeCorrect
+  };
+}
+
+function getCurrentPreset() {
+  return gamePresets[state.preset];
+}
+
 function getCurrentCountries() {
-  return gameModes[state.mode].countries;
+  return getCurrentPreset().countries;
+}
+
+function getRegionForCode(code) {
+  return regionByCode.get(code) || "other";
 }
 
 function getLookalikeBlockedCodes(countryCode) {
@@ -669,7 +887,7 @@ function showCompletion() {
   celebrationEl.classList.remove("wrong");
   celebrationKickerEl.textContent = "Complete";
   celebrationTitleEl.textContent = "Full Set Done";
-  celebrationCopyEl.textContent = `You finished ${gameModes[state.mode].scoreContext}. Restart the app to play this set again.`;
+  celebrationCopyEl.textContent = `You finished ${getCurrentPreset().scoreContext}. Restart the app to play this set again.`;
   showFeedback();
 }
 
@@ -697,7 +915,7 @@ function renderScore() {
 
 function handleEndGame() {
   if (state.isEnded) {
-    resetGame(state.mode);
+    resetGame(state.preset);
     return;
   }
 
@@ -794,7 +1012,7 @@ function updateHighScore() {
 
   state.highScore = state.points;
   try {
-    localStorage.setItem(getHighScoreKey(state.mode), String(state.highScore));
+    localStorage.setItem(getHighScoreKey(state.preset), String(state.highScore));
   } catch {
     // Some private browsing modes can block localStorage writes.
   }
