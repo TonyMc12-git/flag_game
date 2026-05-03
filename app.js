@@ -372,7 +372,7 @@ Object.entries(regionCodeGroups).forEach(([region, codes]) => {
   });
 });
 
-const APP_VERSION = "20260503-flagstrikes1";
+const APP_VERSION = "20260503-flagstrikes2";
 const HIGH_SCORE_PREFIX = "flagGameHighScore";
 const flagLoadStates = new Map();
 const DEFAULT_DIFFICULTY_LABEL = "This is too hard \u{1F62D}";
@@ -477,6 +477,8 @@ const state = {
   isLocked: false,
   isDifficultyMenuOpen: false,
   isComplete: false,
+  pendingGameOverReason: null,
+  pendingNewBestGameOver: false,
   correct: 0,
   presented: 0
 };
@@ -499,6 +501,24 @@ celebrationButtonEl.addEventListener("click", () => {
   }
 
   hideCelebration();
+  if (state.pendingNewBestGameOver) {
+    state.pendingNewBestGameOver = false;
+    finishGame("strikes");
+    return;
+  }
+
+  if (state.pendingGameOverReason) {
+    const pendingReason = state.pendingGameOverReason;
+    state.pendingGameOverReason = null;
+    if (pendingReason === "strikes" && state.points > state.startingHighScore) {
+      state.pendingNewBestGameOver = true;
+      showNewBestCelebration();
+      return;
+    }
+    finishGame(pendingReason);
+    return;
+  }
+
   if (state.isComplete) {
     return;
   }
@@ -529,6 +549,8 @@ function resetGame(countrySetKey, optionCount = state.optionCount, keepMenuOpen 
   state.highScore = readHighScore();
   state.startingHighScore = state.highScore;
   state.strikes = 0;
+  state.pendingGameOverReason = null;
+  state.pendingNewBestGameOver = false;
   state.correctStreak = 0;
   state.streakElapsedMs = 0;
   state.resetTimerOnNextRound = false;
@@ -783,11 +805,10 @@ function chooseCountry(country, button) {
   }
 
   renderScore();
-  if (!isCorrect && state.strikes >= 5) {
-    finishGame("strikes");
-    return;
-  }
   showCelebration(isCorrect, country.name);
+  if (!isCorrect && state.strikes >= 5) {
+    state.pendingGameOverReason = "strikes";
+  }
 }
 
 function useFiftyFifty() {
@@ -832,6 +853,14 @@ function showCelebration(isCorrect, chosenName) {
   celebrationCopyEl.textContent = isCorrect
     ? `${state.currentCountry.name} is right.`
     : `You chose ${chosenName}.`;
+  showFeedback();
+}
+
+function showNewBestCelebration() {
+  celebrationEl.classList.remove("wrong");
+  celebrationKickerEl.textContent = "New Best";
+  celebrationTitleEl.textContent = `${state.points} points`;
+  celebrationCopyEl.textContent = "New high score before strike five.";
   showFeedback();
 }
 
@@ -904,14 +933,6 @@ function finishGame(reason = "complete") {
     flagEmojiEl.textContent = "\u{1F62D}";
     flagEmojiEl.removeAttribute("aria-label");
     flagEmojiEl.removeAttribute("role");
-    if (state.points > state.startingHighScore) {
-      celebrationEl.classList.remove("wrong");
-      celebrationKickerEl.textContent = "New Best";
-      celebrationTitleEl.textContent = `${state.points} points`;
-      celebrationCopyEl.textContent = "New high score before strike five.";
-      showFeedback();
-      return;
-    }
     return;
   }
 
