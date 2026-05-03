@@ -575,7 +575,6 @@ function updateDifficultyMenuButtons() {
 
 function updateDifficultyToggleButton() {
   difficultyToggleEl.textContent = state.optionCount === 20 ? "5 options only" : "All 20 options";
-  difficultyToggleEl.classList.toggle("active", state.optionCount === 5);
 }
 
 function updateModeButtonLabel() {
